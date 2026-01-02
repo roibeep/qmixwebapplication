@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Project;
+use App\Models\User;
 use Inertia\Inertia;
 
 class UserProjectController extends Controller
@@ -13,18 +14,23 @@ class UserProjectController extends Controller
     {
         $search = $request->input('search');
 
-        $projectsQuery = Project::with('customer')
-            ->where('customerID', auth()->id())
-            ->orderBy('projectID');
+        // PRD users can see ALL projects
+        $projectsQuery = Project::with('customer')->orderBy('projectID');
 
         if(!empty($search)) {
-            $projectsQuery->where('name', 'like', "%{$search}%");
+            $projectsQuery->where('name', 'like', "%{$search}%")
+                ->orWhereHas('customer', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                });
         }
 
-        $projects = $projectQuery->get();
+        $projects = $projectsQuery->get(); // ✅ Fixed typo
+
+        $clients = User::where('role', 'client')->get();
 
         return Inertia::render('User/Projects/Index', [
             'projects' => $projects,
+            'clients' => $clients,
             'filters' => $request->only('search'),
         ]);
     }
@@ -33,12 +39,11 @@ class UserProjectController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'customerID' => 'required|exists:users,id',
             'project_location' => 'required|string|max:255',
             'end_location' => 'nullable|string|max:255',
             'design_mix' => 'nullable|string|max:255'
         ]);
-
-        $data['customerID'] = auth()->id();
 
         Project::create($data);
 
@@ -49,13 +54,13 @@ class UserProjectController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'customerID' => 'required|exists:users,id',
             'project_location' => 'required|string|max:255',
             'end_location' => 'nullable|string|max:255',
             'design_mix' => 'nullable|string|max:255',
         ]);
 
-        $project = Project::where('customerID', auth()->id())->findOrFail($id);
-
+        $project = Project::findOrFail($id);
         $project->update($data);
 
         return redirect()->back()->with('success', 'Project updated successfully.');
@@ -63,23 +68,9 @@ class UserProjectController extends Controller
 
     public function destroy($id)
     {
-        $project = Project::where('customerID', auth()->id())->findOrFail($id);
-
+        $project = Project::findOrFail($id);
         $project->delete();
 
         return redirect()->back()->with('success', 'Project deleted successfully.');
-    }
-
-    public function showByProjectPage($projectID)
-    {
-        $project = Project::with('deliveries')
-            ->where('customerID', auth()->id())
-            ->findOrFail($projectID);
-
-        return Inertia::render('User/Project/ProjectDeliveries', [
-            'project' => $project,
-            'deliveries' => $project->deliveries,
-            'auth' => ['user' => auth()->user()],
-        ]);
     }
 }

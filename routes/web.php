@@ -109,12 +109,19 @@ Route::middleware(['auth', 'role:client'])->prefix('client')->name('client.')->g
     
 });
 
-Route::middleware(['auth', 'prd.user'])->prefix('prd')->group(function () {
-    Route::get('/projects', [UserProjectController::class, 'index'])->name('prd.projects.index');
-    Route::post('/projects', [UserProjectController::class, 'store'])->name('prd.projects.store');
-    Route::get('/projects/{id}', [UserProjectController::class, 'showByProjectPage'])->name('prd.project.show');
-    Route::put('/projects/{id}', [UserProjectController::class, 'update'])->name('prd.projects.update');
-    Route::delete('/projects/{id}', [UserProjectController::class, 'destroy'])->name('prd.projects.destroy');
+Route::middleware(['auth', 'prd.user'])->prefix('user')->group(function () {
+    // Projects
+    Route::get('/projects', [UserProjectController::class, 'index'])->name('user.projects.index');
+    Route::post('/projects/store', [UserProjectController::class, 'store'])->name('user.projects.store');
+    Route::get('/projects/{id}', [UserProjectController::class, 'showByProjectPage'])->name('user.project.show');
+    Route::put('/projects/{id}', [UserProjectController::class, 'update'])->name('user.projects.update');
+    Route::delete('/projects/{id}', [UserProjectController::class, 'destroy'])->name('user.projects.destroy');
+    
+    // Tracking Deliveries
+    Route::get('/projects/{projectID}/deliveries', [UserTrackingDeliveryController::class, 'getByProject']);
+    Route::post('/projects/{projectID}/deliveries', [UserTrackingDeliveryController::class, 'store']);
+    Route::put('/trackingdelivery/{id}', [UserTrackingDeliveryController::class, 'update']);
+    Route::delete('/trackingdelivery/{id}', [UserTrackingDeliveryController::class, 'destroy']);
 });
 
 

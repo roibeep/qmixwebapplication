@@ -8,23 +8,60 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Search, FileText, CalendarClock, Loader, Truck, CheckCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { PageProps as InertiaPageProps } from '@inertiajs/core';
 
-interface Project { projectID: number; name: string; project_location: string; end_location?: string | null; design_mix?: string | null; }
-interface Delivery { deliveryID: number; mp_no: string; truck_no: string; volume: number; delivery_status: string; overall_volume?: number; }
+interface Customer { id: number; name: string; }
+interface Project { 
+  projectID: number; 
+  name: string; 
+  project_location: string; 
+  end_location?: string | null; 
+  design_mix?: string | null;
+  customer?: Customer | null;
+}
+interface Delivery { 
+  deliveryID: number; 
+  mp_no: string; 
+  truck_no: string; 
+  volume: number; 
+  delivery_status: string; 
+  overall_volume?: number; 
+}
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Manage Projects and Track Deliveries', href: '/prd/projects' }];
+interface PageProps extends InertiaPageProps {
+  projects: Project[];
+  clients: Customer[];
+  auth: {
+    user: {
+      role: string;
+      department?: {
+        id: number;
+        name: string;
+      };
+    };
+  };
+}
+
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Manage Projects and Track Deliveries', href: '/user/projects' }];
 
 export default function UserProjectIndex() {
-  const { projects, auth } = usePage<{ projects: Project[]; auth: any }>().props;
+  const { projects, clients, auth } = usePage<PageProps>().props;
 
   const currentUser = auth.user;
-  const isAuthorized = currentUser.role === 'user' && currentUser.department === 'PRD Department';
+  // ✅ Fixed: Added .name to compare department
+  const isAuthorized = currentUser.role === 'user' && currentUser.department?.name === 'PRD Department';
 
   /* ================= STATE ================= */
   const [search, setSearch] = useState('');
   const [openProjectDialog, setOpenProjectDialog] = useState(false);
   const [editProjectId, setEditProjectId] = useState<number | null>(null);
-  const [projectForm, setProjectForm] = useState({ name: '', project_location: '', end_location: '', design_mix: '' });
+  const [projectForm, setProjectForm] = useState({ 
+    customerID: '' as number | '', 
+    name: '', 
+    project_location: '', 
+    end_location: '', 
+    design_mix: '' 
+  });
 
   const [openDeliveryDialog, setOpenDeliveryDialog] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -37,7 +74,9 @@ export default function UserProjectIndex() {
   const filteredProjects = useMemo(() => {
     if (!search) return projects;
     const q = search.toLowerCase();
-    return projects.filter(p => p.name.toLowerCase().includes(q));
+    return projects.filter(
+      p => p.name.toLowerCase().includes(q) || (p.customer?.name.toLowerCase().includes(q) ?? false)
+    );
   }, [search, projects]);
 
   /* ================= OVERALL VOLUME LOGIC ================= */
@@ -69,13 +108,14 @@ export default function UserProjectIndex() {
 
   /* ================= PROJECT HANDLERS ================= */
   const openAddProject = () => {
-    setProjectForm({ name: '', project_location: '', end_location: '', design_mix: '' });
+    setProjectForm({ customerID: '', name: '', project_location: '', end_location: '', design_mix: '' });
     setEditProjectId(null);
     setOpenProjectDialog(true);
   };
 
   const openEditProject = (proj: Project) => {
     setProjectForm({
+      customerID: proj.customer?.id || '',
       name: proj.name,
       project_location: proj.project_location,
       end_location: proj.end_location || '',
@@ -86,7 +126,7 @@ export default function UserProjectIndex() {
   };
 
   const closeProjectDialog = () => {
-    setProjectForm({ name: '', project_location: '', end_location: '', design_mix: '' });
+    setProjectForm({ customerID: '', name: '', project_location: '', end_location: '', design_mix: '' });
     setEditProjectId(null);
     setOpenProjectDialog(false);
   };
@@ -94,23 +134,29 @@ export default function UserProjectIndex() {
   const submitProject = (e: React.FormEvent) => {
     e.preventDefault();
     if (editProjectId) {
-      router.put(`/prd/projects/${editProjectId}`, projectForm, { onSuccess: () => router.reload({ only: ['projects'] }) });
+      router.put(`/user/projects/${editProjectId}`, projectForm, { 
+        onSuccess: () => router.reload({ only: ['projects'] }) 
+      });
     } else {
-      router.post('/prd/projects', projectForm, { onSuccess: () => router.reload({ only: ['projects'] }) });
+      router.post('/user/projects/store', projectForm, { 
+        onSuccess: () => router.reload({ only: ['projects'] }) 
+      });
     }
     closeProjectDialog();
   };
 
   const deleteProject = (id: number) => {
     if (!confirm('Are you sure you want to delete this project?')) return;
-    router.delete(`/prd/projects/${id}`, { onSuccess: () => router.reload({ only: ['projects'] }) });
+    router.delete(`/user/projects/${id}`, { 
+      onSuccess: () => router.reload({ only: ['projects'] }) 
+    });
   };
 
   /* ================= DELIVERY HANDLERS ================= */
   const openDeliveryList = async (proj: Project) => {
     setSelectedProject(proj);
     try {
-      const res = await fetch(`/prd/projects/${proj.projectID}/deliveries`);
+      const res = await fetch(`/user/projects/${proj.projectID}/deliveries`);
       setDeliveryList(await res.json());
       setOpenDeliveryDialog(true);
     } catch (err) {
@@ -134,12 +180,12 @@ export default function UserProjectIndex() {
     e.preventDefault();
     if (!selectedProject) return;
     const url = editDeliveryId
-      ? `/prd/trackingdelivery/${editDeliveryId}`
-      : `/prd/projects/${selectedProject.projectID}/deliveries`;
+      ? `/user/trackingdelivery/${editDeliveryId}`
+      : `/user/projects/${selectedProject.projectID}/deliveries`;
     const method = editDeliveryId ? 'put' : 'post';
     router[method](url, editDeliveryId ? { ...deliveryForm, projectID: selectedProject.projectID } : deliveryForm, {
       onSuccess: async () => {
-        const res = await fetch(`/prd/projects/${selectedProject.projectID}/deliveries`);
+        const res = await fetch(`/user/projects/${selectedProject.projectID}/deliveries`);
         setDeliveryList(await res.json());
         setOpenAddDeliveryDialog(false);
         setEditDeliveryId(null);
@@ -149,10 +195,10 @@ export default function UserProjectIndex() {
 
   const deleteDelivery = (id: number) => {
     if (!confirm('Are you sure you want to delete this delivery?')) return;
-    router.delete(`/prd/trackingdelivery/${id}`, {
+    router.delete(`/user/trackingdelivery/${id}`, {
       onSuccess: async () => {
         if (!selectedProject) return;
-        const res = await fetch(`/prd/projects/${selectedProject.projectID}/deliveries`);
+        const res = await fetch(`/user/projects/${selectedProject.projectID}/deliveries`);
         setDeliveryList(await res.json());
       },
     });
@@ -177,6 +223,7 @@ export default function UserProjectIndex() {
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-4 py-2 text-left font-semibold">#</th>
+                <th className="px-4 py-2 text-left font-semibold">Customer</th>
                 <th className="px-4 py-2 text-left font-semibold">Project Name</th>
                 <th className="px-4 py-2 text-left font-semibold">Project Location</th>
                 <th className="px-4 py-2 text-left font-semibold">End Location</th>
@@ -190,6 +237,7 @@ export default function UserProjectIndex() {
                 filteredProjects.map((proj, idx) => (
                   <tr key={proj.projectID} className="border-b hover:bg-gray-50">
                     <td className="px-4 py-2">{idx + 1}</td>
+                    <td className="px-4 py-2">{proj.customer?.name || '-'}</td>
                     <td className="px-4 py-2">{proj.name}</td>
                     <td className="px-4 py-2">{proj.project_location}</td>
                     <td className="px-4 py-2">{proj.end_location || '-'}</td>
@@ -209,7 +257,7 @@ export default function UserProjectIndex() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={isAuthorized ? 6 : 5} className="text-center py-4 text-gray-500">
+                  <td colSpan={isAuthorized ? 8 : 7} className="text-center py-4 text-gray-500">
                     No projects found.
                   </td>
                 </tr>
@@ -221,12 +269,25 @@ export default function UserProjectIndex() {
 
       {/* ===== Add/Edit Project Dialog ===== */}
       <Dialog open={openProjectDialog} onOpenChange={setOpenProjectDialog}>
-        <DialogContent>
+        <DialogContent className="bg-white">
           <DialogHeader>
             <DialogTitle>{editProjectId ? 'Edit Project' : 'Add Project'}</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={submitProject} className="space-y-4 mt-4">
+            <div>
+              <Label>Customer</Label>
+              <select
+                value={projectForm.customerID}
+                onChange={(e) => setProjectForm({ ...projectForm, customerID: Number(e.target.value) })}
+                className="border p-2 w-full rounded"
+                required
+                disabled={!!editProjectId}
+              >
+                <option value="">-- Select Customer --</option>
+                {clients?.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
             <div>
               <Label>Project Name</Label>
               <Input value={projectForm.name} onChange={(e) => setProjectForm({ ...projectForm, name: e.target.value })} required />
@@ -252,7 +313,51 @@ export default function UserProjectIndex() {
         </DialogContent>
       </Dialog>
 
-      {/* ===== Delivery Dialog ===== */}
+      {/* ===== Delivery Dialog - Add/Edit Delivery ===== */}
+      <Dialog open={openAddDeliveryDialog} onOpenChange={setOpenAddDeliveryDialog}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle>{editDeliveryId ? 'Edit Delivery' : 'Add Delivery'}</DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={submitDelivery} className="space-y-4 mt-4">
+            <div>
+              <Label>MP No</Label>
+              <Input value={deliveryForm.mp_no} onChange={(e) => setDeliveryForm({ ...deliveryForm, mp_no: e.target.value })} required />
+            </div>
+            <div>
+              <Label>Truck No</Label>
+              <Input value={deliveryForm.truck_no} onChange={(e) => setDeliveryForm({ ...deliveryForm, truck_no: e.target.value })} required />
+            </div>
+            <div>
+              <Label>Volume</Label>
+              <Input type="number" value={deliveryForm.volume} onChange={(e) => setDeliveryForm({ ...deliveryForm, volume: Number(e.target.value) })} required />
+            </div>
+            <div>
+              <Label>Status</Label>
+              <select
+                value={deliveryForm.delivery_status}
+                onChange={(e) => setDeliveryForm({ ...deliveryForm, delivery_status: e.target.value })}
+                className="w-full border rounded-md px-3 py-2"
+                required
+              >
+                <option value="SO Created">SO Created</option>
+                <option value="Schedule Create">Schedule Create</option>
+                <option value="Batching on Process">Batching on Process</option>
+                <option value="Out for Delivery">Out for Delivery</option>
+                <option value="Delivered">Delivered</option>
+              </select>
+            </div>
+
+            <div className="flex justify-end gap-2 mt-4">
+              <Button type="button" variant="outline" onClick={() => setOpenAddDeliveryDialog(false)}>Cancel</Button>
+              <Button type="submit">{editDeliveryId ? 'Update' : 'Add'}</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== View Deliveries Dialog ===== */}
       <Dialog open={openDeliveryDialog} onOpenChange={setOpenDeliveryDialog}>
         <DialogContent className="sm:max-w-[900px] p-6 bg-white">
           <DialogHeader>

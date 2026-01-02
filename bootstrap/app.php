@@ -3,6 +3,7 @@
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RoleMiddleware;
+use App\Http\Middleware\EnsurePrdUser;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,7 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'role' => RoleMiddleware::class, // 👈 Add this line
+            'role' => RoleMiddleware::class,
+            'prd.user' => EnsurePrdUser::class, 
         ]);
         
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);

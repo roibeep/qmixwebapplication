@@ -12,15 +12,14 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, Star, IdCard, Archive, Cuboid, UsersRound, LayoutGrid, Footprints } from 'lucide-react';
-import { usePage } from '@inertiajs/react';
 import AppLogo from './app-logo';
 
 export function AppSidebar() {
 const {auth} = usePage().props;
 const userRole = auth?.user?.role || 'user';
-const userDepartment = auth.user?.department;
+const userDepartment = auth.user?.department?.name;;
 
 /* ======== All Users ======== */
 const mainNavItems: NavItem[] = [
