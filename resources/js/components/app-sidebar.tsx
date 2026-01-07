@@ -19,7 +19,16 @@ import AppLogo from './app-logo';
 export function AppSidebar() {
 const {auth} = usePage().props;
 const userRole = auth?.user?.role || 'user';
-const userDepartment = auth.user?.department?.name;;
+const userDepartment = auth.user?.department?.name;
+
+// ✅ ADD THIS RIGHT HERE (after line 22):
+console.log('Sidebar Debug:', {
+    userRole: userRole,
+    departmentObject: auth.user?.department,
+    departmentName: userDepartment,
+    exactMatch: userDepartment === 'PRD Department',
+    typeofDept: typeof userDepartment
+});
 
 /* ======== All Users ======== */
 const mainNavItems: NavItem[] = [
@@ -120,11 +129,7 @@ const userProjectNavItems: NavItem[] = [
     {
         roleBasedNavItems = [...roleBasedNavItems,...clientNavItems,...clientFormNavItems];
     }
-    if(userRole === 'user')
-    {
-        roleBasedNavItems = [...roleBasedNavItems,...userProjectNavItems];
-    }
-    if (userRole === 'user' && userDepartment === 'PRD Department') 
+    if(userRole === 'user' && userDepartment === 'PRD Department')
     {
         roleBasedNavItems = [...roleBasedNavItems,...userProjectNavItems];
     }

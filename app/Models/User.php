@@ -57,8 +57,12 @@ class User extends Authenticatable
 
     public function isPrdUser(): bool
     {
+        if (!$this->relationLoaded('department')) {
+            $this->load('department');
+        }
+
         return $this->role === 'user'
-            && $this->department === 'PRD Department';
+            && $this->department?->name === 'PRD Department';
     }
 
     public function canManageProjects(): bool
