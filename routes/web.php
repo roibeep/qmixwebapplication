@@ -8,6 +8,7 @@ use App\Http\Controllers\SuperAdmin\SuperAdminUserController;
 use App\Http\Controllers\SuperAdmin\SuperAdminProjectController;
 use App\Http\Controllers\SuperAdmin\SuperAdminTrackingDeliveryController;
 use App\Http\Controllers\SuperAdmin\SuperAdminReviewController;
+use App\Http\Controllers\SuperAdmin\SuperAdminDashboardController;
 use App\Http\Controllers\Admin\AdminProjectController;
 use App\Http\Controllers\Admin\AdminTrackingDeliveryController;
 use App\Http\Controllers\Admin\AdminDepartmentController;
@@ -16,6 +17,8 @@ use App\Http\Controllers\Client\ClientProjectController;
 use App\Http\Controllers\Client\ClientReviewController;
 use App\Http\Controllers\User\UserProjectController;
 use App\Http\Controllers\User\UserTrackingDeliveryController;
+use App\Http\Controllers\HomeController;
+
 
 use App\Models\Department;
 
@@ -26,9 +29,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
 });
 
 Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->group(function () {
@@ -79,6 +80,10 @@ Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->group(func
     Route::get('/reviews/{id}', [SuperAdminReviewController::class, 'show']);
     Route::put('/reviews/{id}/status', [SuperAdminReviewController::class, 'updateStatus']);
     Route::delete('/reviews/{id}', [SuperAdminReviewController::class, 'destroy']);
+
+    // Super Admin Dashboard
+    Route::get('/dashboard', [SuperAdminDashboardController::class, 'index'])
+    ->name('superadmin.dashboard');
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {

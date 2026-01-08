@@ -1,25 +1,28 @@
 <?php
 
-namespace App\Http\Controllers\SuperAdmin;
+
+namespace App\Http\Controllers\SuperAdmin;  // ✅ Should be SuperAdmin, NOT User
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Department;
-use App\Models\Projects;
-use App\Models\TrackingDelivary;
-use Illuminate\Http\Request;
+use App\Models\Project;
+use App\Models\TrackingDelivery;
+use Inertia\Inertia;
 
 class SuperAdminDashboardController extends Controller
 {
     public function index()
     {
+        // Get summary statistics
         $stats = [
             'total_users' => User::count(),
-            'total_department' => Department::count(),
+            'total_departments' => Department::count(),
             'total_projects' => Project::count(),
             'total_deliveries' => TrackingDelivery::count(),
         ];
 
+        // Get detailed user data with relationships
         $users = User::with(['department'])
             ->get()
             ->map(function ($user) {
@@ -39,10 +42,10 @@ class SuperAdminDashboardController extends Controller
                     'deliveries_count' => $deliveriesCount,
                 ];
             });
-        
-            return Inertia::render('SuperAdmin/Dashboard/Index', [
-                'stats' => $stats,
-                'users' => $users,
-            ]);
+
+        return Inertia::render('SuperAdmin/Dashboard/Index', [
+            'stats' => $stats,
+            'users' => $users,
+        ]);
     }
 }

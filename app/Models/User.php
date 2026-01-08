@@ -70,4 +70,9 @@ class User extends Authenticatable
         return ($this->role === 'superadmin' || $this->role === 'user')
         && $this->department?->name === 'PRD Department';
     }
+
+    public function projects()
+    {
+        return $this->hasMany(Project::class, 'customerID');
+    } 
 }

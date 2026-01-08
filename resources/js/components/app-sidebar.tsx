@@ -34,7 +34,20 @@ console.log('Sidebar Debug:', {
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
+        href: (() => {
+            switch(userRole) {
+                case 'superadmin':
+                    return '/superadmin/dashboard';
+                case 'admin':
+                    return '/admin/dashboard';
+                case 'client':
+                    return '/client/dashboard';
+                case 'user':
+                    return '/user/dashboard';
+                default:
+                    return dashboard();
+            }
+        })(),
         icon: LayoutGrid,
     },
 ];
