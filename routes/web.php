@@ -18,14 +18,10 @@ use App\Http\Controllers\Client\ClientReviewController;
 use App\Http\Controllers\User\UserProjectController;
 use App\Http\Controllers\User\UserTrackingDeliveryController;
 use App\Http\Controllers\HomeController;
-
-
 use App\Models\Department;
 
 Route::get('/', function () {
-    return Inertia::render('welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ]);
+    return response()->file(public_path('html/index.html'));
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
