@@ -1,20 +1,26 @@
 <?php
 
-namespace App\Http\Controllers\SuperAdmin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
-class SuperAdminUserController extends Controller
+class AdminUserController extends Controller
 {
-    public function index(Request $request)
+    public function indexAdmin(Request $request)
     {
+        $admin = Auth::user();
+        $adminDepartmentID = $admin->departmentID;
+
         $search = $request->input('search');
 
+        // Only get users from admin's department
         $usersQuery = User::with('department')
+            ->where('departmentID', $adminDepartmentID)
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -39,14 +45,17 @@ class SuperAdminUserController extends Controller
             ];
         });
 
-        $departments = Department::all()->map(function($dept) {
-            return [
-                'departmentID' => $dept->departmentID,
-                'name' => $dept->name,
-            ];
-        });
+        // Only show admin's department
+        $departments = Department::where('departmentID', $adminDepartmentID)
+            ->get()
+            ->map(function($dept) {
+                return [
+                    'departmentID' => $dept->departmentID,
+                    'name' => $dept->name,
+                ];
+            });
 
-        return Inertia::render('SuperAdmin/Users/Index', [
+        return Inertia::render('Admin/Users/Index', [
             'users' => $users,
             'departments' => $departments,
             'filters' => [
@@ -57,14 +66,18 @@ class SuperAdminUserController extends Controller
 
     public function store(Request $request)
     {
+        $admin = Auth::user();
+        $adminDepartmentID = $admin->departmentID;
+
         $validated = $request->validate([
             'name'         => 'required|string|max:255',
             'email'        => 'required|email|unique:users',
             'role'         => 'required|string',
-            'departmentID' => 'nullable|exists:departments,departmentID',
             'password'     => 'required|min:6',
         ]);
 
+        // Force the new user to be in admin's department
+        $validated['departmentID'] = $adminDepartmentID;
         $validated['password'] = bcrypt($validated['password']);
 
         User::create($validated);
@@ -74,16 +87,25 @@ class SuperAdminUserController extends Controller
 
     public function update(Request $request, $id)
     {
+        $admin = Auth::user();
+        $adminDepartmentID = $admin->departmentID;
+
         $user = User::findOrFail($id);
+
+        // Check if user belongs to admin's department
+        if ($user->departmentID !== $adminDepartmentID) {
+            abort(403, 'Unauthorized - User not in your department');
+        }
 
         $validated = $request->validate([
             'name'         => 'required|string|max:255',
             'email'        => 'required|email|unique:users,email,' . $user->id,
             'role'         => 'required|string',
-            'departmentID' => 'nullable|exists:departments,departmentID',
             'password'     => 'nullable|min:6',
         ]);
 
+        // Keep user in the same department
+        $validated['departmentID'] = $adminDepartmentID;
         $validated['password'] = $request->filled('password') 
             ? bcrypt($request->password) 
             : $user->password;
@@ -95,14 +117,35 @@ class SuperAdminUserController extends Controller
 
     public function destroy($id)
     {
+        $admin = Auth::user();
+        $adminDepartmentID = $admin->departmentID;
+
         $user = User::findOrFail($id);
 
-        if (auth()->user()->role === 'admin' && $user->role === 'superadmin') {
-            abort(403, 'Unauthorized');
+        // Check if user belongs to admin's department
+        if ($user->departmentID !== $adminDepartmentID) {
+            abort(403, 'Unauthorized - User not in your department');
+        }
+
+        // Prevent admin from deleting superadmin
+        if ($user->role === 'superadmin') {
+            abort(403, 'Cannot delete superadmin');
         }
 
         $user->delete();
 
         return redirect()->back()->with('success', 'User deleted successfully');
+    }
+
+    public function show($id)
+    {
+        $admin = Auth::user();
+        $adminDepartmentID = $admin->departmentID;
+
+        $user = User::where('id', $id)
+            ->where('departmentID', $adminDepartmentID)
+            ->firstOrFail();
+
+        return response()->json($user, 200);
     }
 }

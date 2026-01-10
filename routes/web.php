@@ -24,6 +24,10 @@ Route::get('/', function () {
     return response()->file(public_path('html/index.html'));
 })->name('home');
 
+Route::get('/branch', function () {
+    return response()->file(public_path('html/site.html'));
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
 });

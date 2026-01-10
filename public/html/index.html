@@ -28,7 +28,7 @@
       <header class="fbs__net-navbar navbar navbar-expand-lg dark">
         <div class="container d-flex align-items-center justify-content-between">
           <!-- Start Logo-->
-          <a class="navbar-brand w-auto" href="index.html">
+          <a class="navbar-brand w-auto" href="/">
             <img class="logo dark img-fluid" src="/images/q-mix-logo.png" width="70" height="70" alt="Qmix Logo">
           </a>
           <div class="offcanvas offcanvas-start w-75" id="fbs__net-navbars" tabindex="-1" aria-labelledby="fbs__net-navbarsLabel">
@@ -42,12 +42,12 @@
             </div>
             <div class="offcanvas-body align-items-lg-center">  
               <ul class="navbar-nav nav me-auto ps-lg-5 mb-2 mb-lg-0">
-                <li class="nav-item"><a class="nav-link scroll-link active" aria-current="page" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link scroll-link active" aria-current="page" href="/">Home</a></li>
                 <li class="nav-item"><a class="nav-link scroll-link" href="#about">About</a></li>
                 <li class="nav-item"><a class="nav-link scroll-link" href="#services">Services</a></li>
                 <li class="nav-item"><a class="nav-link scroll-link" href="#faq">FAQ</a></li>
                 <li class="nav-item"><a class="nav-link scroll-link" href="#contact">Contact</a></li>
-                <li class="nav-item"><a class="nav-link scroll-link" href="site.html">Branch</a></li>
+                <li class="nav-item"><a class="nav-link scroll-link" href="/branch">Branch</a></li>
               </ul>
             </div>
           </div>
@@ -55,14 +55,9 @@
             <div class="header-social d-flex align-items-center gap-1">
               
               <!-- Login Button -->
-              <a href="/login" class="btn btn-login me-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
-                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                  <polyline points="10 17 15 12 10 7"></polyline>
-                  <line x1="15" y1="12" x2="3" y2="12"></line>
-                </svg>
-                Log In
-              </a>
+              <button class="btn btn-login me-2" onclick="window.location.href='/login'">
+                  Log In
+              </button>
               
               <button class="fbs__net-navbar-toggler justify-content-center align-items-center ms-auto" data-bs-toggle="offcanvas" data-bs-target="#fbs__net-navbars" aria-controls="fbs__net-navbars" aria-label="Toggle navigation" aria-expanded="false">
                 <svg class="fbs__net-icon-menu" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -265,41 +260,41 @@
                 <div class="faq-content">
                   <div class="accordion custom-accordion" id="accordionPanelsStayOpenExample">
                     <div class="accordion-item">
-                      <h2 class="accordion-header">
+                      <h3 class="accordion-header">
                         <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne"> What is Ready-Mix Concrete and why should I use it? </button>
-                      </h2>
+                      </h3>
                       <div class="accordion-collapse collapse show" id="panelsStayOpen-collapseOne">
                         <div class="accordion-body">Ready-Mix Concrete is a pre-mixed solution of cement, aggregates, water, and additives produced in a controlled environment. It ensures consistent quality, saves time on-site, and reduces labor costs compared to manual mixing.</div>
                       </div>
                     </div>
                     <div class="accordion-item">
-                      <h2 class="accordion-header">
+                      <h3 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo"> How does Qmix ensure the quality of its products </button>
-                      </h2>
+                      </h3>
                       <div class="accordion-collapse collapse" id="panelsStayOpen-collapseTwo">
                         <div class="accordion-body">Every batch undergoes rigorous laboratory and field testing to meet both local and international construction standards. We follow strict quality control processes to guarantee strength, durability, and performance.</div>
                       </div>
                     </div>
                     <div class="accordion-item">
-                      <h2 class="accordion-header">
+                      <h3 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false" aria-controls="panelsStayOpen-collapseThree"> Do you provide concrete pumping services? </button>
-                      </h2>
+                      </h3>
                       <div class="accordion-collapse collapse" id="panelsStayOpen-collapseThree">
                         <div class="accordion-body">Yes. Qmix offers advanced concrete pumping services to deliver materials quickly and efficiently—even to hard-to-reach areas. This helps contractors save time, reduce manpower, and maintain safety on-site.</div>
                       </div>
                     </div>
                     <div class="accordion-item">
-                      <h2 class="accordion-header">
+                      <h3 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFour" aria-expanded="false" aria-controls="panelsStayOpen-collapseFour"> What are the advantages of Hot Mix Asphalt from Qmix? </button>
-                      </h2>
+                      </h3>
                       <div class="accordion-collapse collapse" id="panelsStayOpen-collapseFour">
                         <div class="accordion-body">Our Hot Mix Asphalt (HMA) is designed for roads, highways, and large paved surfaces. It offers excellent load-bearing capacity, weather resistance, and reduced maintenance, ensuring longer-lasting pavements.</div>
                       </div>
                     </div>
                     <div class="accordion-item">
-                      <h2 class="accordion-header">
+                      <h3 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFive" aria-expanded="false" aria-controls="panelsStayOpen-collapseFive"> Which industries does Qmix serve? </button>
-                      </h2>
+                      </h3>
                       <div class="accordion-collapse collapse" id="panelsStayOpen-collapseFive">
                         <div class="accordion-body">We supply materials for residential, commercial, industrial, and government infrastructure projects—including roads, bridges, and high-rise buildings.</div>
                       </div>
@@ -460,7 +455,7 @@
 
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    <script src="assets/js/contact-form.js"></script>
+    <script src="/jscript/contact-form.js"></script>
     <!-- End JavaScripts-->
   </body>
 </html>
