@@ -9,15 +9,18 @@ use App\Http\Controllers\SuperAdmin\SuperAdminProjectController;
 use App\Http\Controllers\SuperAdmin\SuperAdminTrackingDeliveryController;
 use App\Http\Controllers\SuperAdmin\SuperAdminReviewController;
 use App\Http\Controllers\SuperAdmin\SuperAdminDashboardController;
+use App\Http\Controllers\SuperAdmin\EmployeesController;
 use App\Http\Controllers\Admin\AdminProjectController;
 use App\Http\Controllers\Admin\AdminTrackingDeliveryController;
 use App\Http\Controllers\Admin\AdminDepartmentController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Client\ClientProjectController;
 use App\Http\Controllers\Client\ClientReviewController;
 use App\Http\Controllers\User\UserProjectController;
 use App\Http\Controllers\User\UserTrackingDeliveryController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LogoutController;
 use App\Models\Department;
 
 Route::get('/', function () {
@@ -31,6 +34,10 @@ Route::get('/branch', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
 });
+
+Route::post('/logout', LogoutController::class)
+    ->middleware('auth')
+    ->name('logout');
 
 Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->group(function () {
 
@@ -82,11 +89,18 @@ Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->group(func
     Route::delete('/reviews/{id}', [SuperAdminReviewController::class, 'destroy']);
 
     // Super Admin Dashboard
-    Route::get('/dashboard', [SuperAdminDashboardController::class, 'index'])
-    ->name('superadmin.dashboard');
+    Route::get('/dashboard', [SuperAdminDashboardController::class, 'index'])->name('superadmin.dashboard');
+
+    //Super Admin Employees
+    Route::get('/employees', [EmployeesController::class, 'index'])->name('superadmin.employees');
+    Route::post('/employees/store', [EmployeesController::class, 'store'])->name('superadmin.employees.store');
+    Route::get('/employees/{id}', [EmployeesController::class, 'show'])->name('superadmin.employees.show');
+    Route::put('/employees/{id}', [EmployeesController::class, 'update'])->name('superadmin.employees.update');
+    Route::delete('/employees/{id}', [EmployeesController::class, 'destroy'])->name('superadmin.employees.destroy');
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/users', [AdminUserController::class, 'indexAdmin'])->name('admin.users');
     Route::post('/users/store', [AdminUserController::class, 'store']);
     Route::get('/users/{id}', [AdminUserController::class, 'show']);

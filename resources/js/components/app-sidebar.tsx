@@ -124,6 +124,34 @@ const superAdminFormNavItems: NavItem[] = [
         icon: Archive,
     },
 ];
+const superAdminEquipment: NavItem[] = [
+    {
+        title: 'Equipment',
+        href: '/superadmin/reviews',
+        icon: Archive,
+    },
+];
+const superAdminCustomer: NavItem[] = [
+    {
+        title: 'Customer',
+        href: '/superadmin/reviews',
+        icon: Archive,
+    },
+];
+const superAdminItemdesign: NavItem[] = [
+    {
+        title: 'Item Design',
+        href: '/superadmin/reviews',
+        icon: Archive,
+    },
+];
+const superAdminEmployees: NavItem[] = [
+    {
+        title: 'Employees',
+        href: '/superadmin/employees',
+        icon: Archive,
+    },
+];
 /* ======== Users ======== */
 const userProjectNavItems: NavItem[] = [
     {
@@ -148,7 +176,8 @@ const userProjectNavItems: NavItem[] = [
     }
     if(userRole === 'superadmin')
     {
-        roleBasedNavItems = [...roleBasedNavItems,...superAdminUserNavItems,...superAdminNavItems,...superAdminProjectNavItems,...superAdminFormNavItems];
+        roleBasedNavItems = [...roleBasedNavItems,...superAdminUserNavItems,...superAdminNavItems,...superAdminProjectNavItems,
+            ...superAdminFormNavItems,...superAdminEquipment,...superAdminCustomer,...superAdminItemdesign,...superAdminEmployees];
     }
 const footerNavItems: NavItem[] = [
 

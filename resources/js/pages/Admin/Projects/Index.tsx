@@ -200,7 +200,7 @@ export default function AdminProjectIndex() {
                 <table className="w-full text-sm">
                   <thead className="bg-gray-100">
                     <tr>
-                      <th className="px-4 py-2 text-left font-semibold">MP No</th>
+                      <th className="px-4 py-2 text-left font-semibold">Trip No</th>
                       <th className="px-4 py-2 text-left font-semibold">Truck</th>
                       <th className="px-4 py-2 text-left font-semibold">Volume</th>
                       <th className="px-4 py-2 text-left font-semibold">Overall Volume</th>
