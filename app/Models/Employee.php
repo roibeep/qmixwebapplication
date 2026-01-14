@@ -4,9 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Employees extends Model
+class Employee extends Model
 {
-    protected $table = 'pk_employees_id';
+    protected $table = 'employees';
+
     protected $primaryKey = 'pk_employee_id';
 
     public $timestamps = false;

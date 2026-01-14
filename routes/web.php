@@ -10,6 +10,9 @@ use App\Http\Controllers\SuperAdmin\SuperAdminTrackingDeliveryController;
 use App\Http\Controllers\SuperAdmin\SuperAdminReviewController;
 use App\Http\Controllers\SuperAdmin\SuperAdminDashboardController;
 use App\Http\Controllers\SuperAdmin\EmployeesController;
+use App\Http\Controllers\SuperAdmin\EquipmentController;
+use App\Http\Controllers\SuperAdmin\ItemDesignController;
+use App\Http\Controllers\SuperAdmin\CustomerController;
 use App\Http\Controllers\Admin\AdminProjectController;
 use App\Http\Controllers\Admin\AdminTrackingDeliveryController;
 use App\Http\Controllers\Admin\AdminDepartmentController;
@@ -97,6 +100,27 @@ Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->group(func
     Route::get('/employees/{id}', [EmployeesController::class, 'show'])->name('superadmin.employees.show');
     Route::put('/employees/{id}', [EmployeesController::class, 'update'])->name('superadmin.employees.update');
     Route::delete('/employees/{id}', [EmployeesController::class, 'destroy'])->name('superadmin.employees.destroy');
+
+    //Super Admin Equipment
+    Route::get('/equipment', [EquipmentController::class, 'index'])->name('superadmin.equipment.index');
+    Route::post('/equipment/store', [EquipmentController::class, 'store']);
+    Route::get('/equipment/{id}', [EquipmentController::class, 'show']);
+    Route::put('/equipment/{id}', [EquipmentController::class, 'update']);
+    Route::delete('/equipment/{id}', [EquipmentController::class, 'destroy']);
+
+    //Super Admin Item Design
+    Route::get('/itemdesign', [ItemDesignController::class, 'index'])->name('superadmin.itemdesign.index');
+    Route::post('/itemdesign/store', [ItemDesignController::class, 'store']);
+    Route::get('/itemdesign/{id}', [ItemDesignController::class, 'show']);
+    Route::put('/itemdesign/{id}', [ItemDesignController::class, 'update']);
+    Route::delete('/itemdesign/{id}', [ItemDesignController::class, 'destroy']);
+
+    //Super Admin Customer
+    Route::get('/customers', [CustomerController::class, 'index'])->name('superadmin.customer.index');
+    Route::post('/customers/store', [CustomerController::class, 'store'])->name('superadmin.customer.store');
+    Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('superadmin.customer.update');
+    Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('superadmin.customer.destroy');
+
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {

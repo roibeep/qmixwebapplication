@@ -207,7 +207,6 @@ export default function UserIndex() {
                   <option value="superadmin">SuperAdmin</option>
                   <option value="admin">Admin</option>
                   <option value="user">User</option>
-                  <option value="client">Client</option>
                 </select>
               </div>
 

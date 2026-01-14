@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
 
-interface Employee {
+interface Employees {
   pk_employee_id: number;
   employee_name: string;
   date_created: string;
@@ -20,7 +20,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function EmployeeIndex() {
-  const { employees } = usePage<{ employees: Employee[] }>().props;
+  const { employees } = usePage<{ employees: Employees[] }>().props;
   const [open, setOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
@@ -42,7 +42,7 @@ export default function EmployeeIndex() {
     setOpen(true);
   };
 
-  const handleOpenEdit = (emp: Employee) => {
+  const handleOpenEdit = (emp: Employees) => {
     setData({ employee_name: emp.employee_name });
     setEditId(emp.pk_employee_id);
     setIsEdit(true);

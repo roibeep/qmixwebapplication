@@ -8,13 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('trucks', function (Blueprint $table) {
-            $table->id('pk_truck_id');
-            $table->string('truck_name');
+        Schema::create('equipment', function (Blueprint $table) {
+            $table->id('pk_equipment_id');
+            $table->string('equipment_name');
             $table->unsignedBigInteger('fk_employee_id');
             $table->timestamp('date_created')->useCurrent();
 
-            // Foreign key constraint
             $table->foreign('fk_employee_id')
                   ->references('pk_employee_id')
                   ->on('employees')
@@ -24,6 +23,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('trucks');
+        Schema::dropIfExists('equipment');
     }
 };
