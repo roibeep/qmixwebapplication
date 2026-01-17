@@ -2,35 +2,41 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Project;
+use App\Models\Transaction;
+use App\Models\Equipment;
 
 class TrackingDelivery extends Model
 {
-    use HasFactory;
-
-    protected $primaryKey = 'deliveryID';
+    protected $table = 'tracking_deliveries';
+    protected $primaryKey = 'pk_delivery_id';
+    public $timestamps = false;
 
     protected $fillable = [
-        'projectID',
+        'fk_transac_id',
         'mp_no',
-        'truck_no',
+        'fk_equipment_id',
         'volume',
         'delivery_status',
+        'overall_volume',
+        'date_created',
+        'date_updated',
     ];
 
-    // Relationship with project
-    public function project()
+    protected $casts = [
+        'volume' => 'float',
+        'overall_volume' => 'float',
+        'date_created' => 'datetime:Y-m-d H:i:s',
+        'date_updated' => 'datetime:Y-m-d H:i:s',
+    ];
+
+    public function transaction()
     {
-        return $this->belongsTo(Project::class, 'projectID');
+        return $this->belongsTo(Transaction::class, 'fk_transac_id', 'pk_transac_id');
     }
 
-    // Accessor for overall volume (sum of previous volumes)
-    public function getOverallVolumeAttribute()
+    public function equipment()
     {
-        return self::where('projectID', $this->projectID)
-                    ->where('deliveryID', '<=', $this->deliveryID)
-                    ->sum('volume');
+        return $this->belongsTo(Equipment::class, 'fk_equipment_id', 'pk_equipment_id');
     }
 }

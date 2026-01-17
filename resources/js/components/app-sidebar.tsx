@@ -59,8 +59,9 @@ export function AppSidebar() {
             title: 'Records',
             icon: Cuboid,
             children: [
-                { title: 'Project Transaction', href: '/superadmin/projects' },
+                { title: 'Project', href: '/superadmin/projects' },
                 { title: 'Logs', href: '/superadmin/trackingdelivery' },
+                { title: 'Transaction', href: '/superadmin/transactions' },
             ],
         },
         {

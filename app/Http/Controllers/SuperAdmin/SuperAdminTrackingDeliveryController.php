@@ -4,81 +4,75 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\TrackingDelivery;
-use App\Models\Project;
+use App\Models\Transaction;
+use App\Models\Equipment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class SuperAdminTrackingDeliveryController extends Controller
 {
-    public function index()
+    // Show deliveries for a transaction (Inertia page)
+    public function index($transacId)
     {
-        return Inertia::render('SuperAdmin/TrackingDelivery/Index', [
-            'deliveries' => TrackingDelivery::with('project.customer')
-                ->orderBy('deliveryID', 'asc')
-                ->get(),
+        $transaction = Transaction::with(['deliveries.equipment', 'customer', 'equipment', 'item'])
+            ->findOrFail($transacId);
 
-            'projects' => Project::with('customer')->get(),
+        return Inertia::render('SuperAdmin/TrackingDeliveries/Index', [
+            'transaction' => $transaction,
+            'equipment' => Equipment::all(),
         ]);
     }
-    public function getByProject($projectID)
-    {
-        return TrackingDelivery::where('projectID', $projectID)
-            ->orderBy('deliveryID', 'asc')
-            ->get();
-    }
 
-    public function store(Request $request, $projectID)
+    // Store a new delivery
+    public function store(Request $request, $transacId)
     {
-        $data = $request->validate([
+        $transaction = Transaction::findOrFail($transacId);
+
+        $validated = $request->validate([
             'mp_no' => 'required|string|max:255',
-            'truck_no' => 'required|string|max:255',
-            'volume' => 'required|numeric',
+            'volume' => 'required|numeric|min:0',
+            'fk_equipment_id' => 'required|exists:equipment,pk_equipment_id',
             'delivery_status' => 'required|string',
         ]);
 
-        $data['projectID'] = $projectID;
+        TrackingDelivery::create([
+            ...$validated,
+            'fk_transac_id' => $transacId,
+            'overall_volume' => $validated['volume'], // adjust if cumulative
+            'date_created' => now(),
+        ]);
 
-        TrackingDelivery::create($data);
-
-        return redirect()->back()->with('success', 'Delivery added successfully.');
-        
+        return redirect()->route('superadmin.trackingdeliveries.index', $transacId)
+            ->with('success', 'Delivery added successfully!');
     }
 
+    // Update delivery
     public function update(Request $request, $id)
     {
-        $data = $request->validate([
+        $delivery = TrackingDelivery::findOrFail($id);
+
+        $validated = $request->validate([
             'mp_no' => 'required|string|max:255',
-            'truck_no' => 'required|string|max:255',
-            'volume' => 'required|numeric',
+            'volume' => 'required|numeric|min:0',
+            'fk_equipment_id' => 'required|exists:equipment,pk_equipment_id',
             'delivery_status' => 'required|string',
-            'projectID' => 'nullable|exists:projects,projectID',
         ]);
 
-        $delivery = TrackingDelivery::findOrFail($id);
-        $delivery->update($data);
+        $delivery->update([...$validated, 'date_updated' => now()]);
 
-        return redirect()->back()->with('success', 'Delivery updated successfully.');
+        return redirect()->route('superadmin.trackingdeliveries.index', $delivery->fk_transac_id)
+            ->with('success', 'Delivery updated successfully!');
     }
 
+    // Delete delivery
     public function destroy($id)
     {
-        TrackingDelivery::findOrFail($id)->delete();
+        $delivery = TrackingDelivery::findOrFail($id);
+        $transactionId = $delivery->fk_transac_id;
 
-        return redirect()->back()->with('success', 'Delivery deleted successfully.');
-    }
+        $delivery->delete();
 
-    public function storeGlobal(Request $request)
-    {
-        $data = $request->validate([
-            'mp_no' => 'required|string|max:255',
-            'truck_no' => 'required|string|max:255',
-            'volume' => 'required|numeric',
-            'delivery_status' => 'required|string',
-            'projectID' => 'required|exists:projects,projectID',
-        ]);
-
-        TrackingDelivery::create($data);
-
-        return redirect()->back()->with('success', 'Delivery added successfully.');
+        return redirect()->route('superadmin.trackingdeliveries.index', $transactionId)
+            ->with('success', 'Delivery deleted successfully!');
     }
 }

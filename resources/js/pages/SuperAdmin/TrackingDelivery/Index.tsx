@@ -9,21 +9,37 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { 
-    title: 'Tracking Deliveries', 
-    href: '/superadmin/trackingdelivery' 
-  },
+  { title: 'Tracking Deliveries', href: '/superadmin/trackingdelivery' },
 ];
+
+interface Project {
+  projectID: number;
+  customer: { name: string } | null;
+  project_location: string;
+}
+
+interface Delivery {
+  deliveryID: number;
+  mp_no: string;
+  truck_no: string;
+  volume: number;
+  delivery_status: string;
+  transaction?: { pk_transac_id: number };
+  equipment?: { pk_equipment_id: number };
+  project?: Project;
+}
 
 export default function TrackingDeliveryIndex() {
   const { deliveries, projects, auth } = usePage<{
-    deliveries: any[];
-    projects: any[];
+    deliveries: Delivery[];
+    projects: Project[];
     auth: { user: any };
   }>().props;
 
   const currentUser = auth.user;
-  const isAuthorized = currentUser.role === 'superadmin' || currentUser.department?.name === 'Production';
+  const isAuthorized =
+    currentUser.role === 'superadmin' ||
+    currentUser.department?.name === 'Production';
 
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
@@ -32,12 +48,13 @@ export default function TrackingDeliveryIndex() {
     truck_no: '',
     volume: '',
     delivery_status: 'SO Created',
-    projectID: '',
+    fk_transac_id: '', // string for select input
+    fk_equipment_id: '', // string for select input
   });
 
-  // Dialog for viewing deliveries by project
+  // Open delivery list dialog
   const [deliveryDialogOpen, setDeliveryDialogOpen] = useState(false);
-  const [deliveryList, setDeliveryList] = useState<any[]>([]);
+  const [deliveryList, setDeliveryList] = useState<Delivery[]>([]);
 
   const openDeliveryList = (projectID: number) => {
     router.get(`/superadmin/projects/${projectID}/deliveries`, {}, {
@@ -50,29 +67,43 @@ export default function TrackingDeliveryIndex() {
   };
 
   const handleOpenAdd = () => {
-    setForm({ mp_no: '', truck_no: '', volume: '', delivery_status: 'SO Created', projectID: '' });
+    setForm({ mp_no: '', truck_no: '', volume: '', delivery_status: 'SO Created', fk_transac_id: '', fk_equipment_id: '' });
     setEditId(null);
     setOpen(true);
   };
 
-  const handleOpenEdit = (d: any) => {
-    setForm({ mp_no: d.mp_no, truck_no: d.truck_no, volume: d.volume, delivery_status: d.delivery_status, projectID: d.projectID });
+  const handleOpenEdit = (d: Delivery) => {
+    setForm({
+      mp_no: d.mp_no,
+      truck_no: d.truck_no,
+      volume: d.volume.toString(),
+      delivery_status: d.delivery_status,
+      fk_transac_id: d.transaction?.pk_transac_id?.toString() ?? '',
+      fk_equipment_id: d.equipment?.pk_equipment_id?.toString() ?? '',
+    });
     setEditId(d.deliveryID);
     setOpen(true);
   };
 
   const handleClose = () => {
-    setForm({ mp_no: '', truck_no: '', volume: '', delivery_status: 'SO Created', projectID: '' });
+    setForm({ mp_no: '', truck_no: '', volume: '', delivery_status: 'SO Created', fk_transac_id: '', fk_equipment_id: '' });
     setEditId(null);
     setOpen(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const payload = {
+      ...form,
+      fk_transac_id: Number(form.fk_transac_id),
+      fk_equipment_id: Number(form.fk_equipment_id),
+      volume: Number(form.volume),
+    };
+
     if (editId) {
-      router.put(`/superadmin/trackingdelivery/${editId}`, form, { onSuccess: handleClose });
+      router.put(`/superadmin/trackingdelivery/${editId}`, payload, { onSuccess: handleClose });
     } else {
-      router.post(`/superadmin/trackingdelivery/store`, form, { onSuccess: handleClose });
+      router.post(`/superadmin/trackingdelivery/store`, payload, { onSuccess: handleClose });
     }
   };
 
@@ -158,12 +189,20 @@ export default function TrackingDeliveryIndex() {
                 </div>
 
                 <div>
-                  <Label htmlFor="projectID">Project</Label>
-                  <select id="projectID" value={form.projectID} onChange={(e) => setForm({ ...form, projectID: e.target.value })} className="border p-2 w-full rounded" required>
-                    <option value="">-- Select Project --</option>
+                  <Label htmlFor="fk_transac_id">Transaction</Label>
+                  <select id="fk_transac_id" value={form.fk_transac_id} onChange={(e) => setForm({ ...form, fk_transac_id: e.target.value })} className="border p-2 w-full rounded" required>
+                    <option value="">-- Select Transaction --</option>
                     {projects.map((p) => (
                       <option key={p.projectID} value={p.projectID}>{p.customer?.name} — {p.project_location}</option>
                     ))}
+                  </select>
+                </div>
+
+                <div>
+                  <Label htmlFor="fk_equipment_id">Equipment</Label>
+                  <select id="fk_equipment_id" value={form.fk_equipment_id} onChange={(e) => setForm({ ...form, fk_equipment_id: e.target.value })} className="border p-2 w-full rounded" required>
+                    <option value="">-- Select Equipment --</option>
+                    {/* Add your equipment options here */}
                   </select>
                 </div>
 
