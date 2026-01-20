@@ -19,6 +19,8 @@ class TrackingDelivery extends Model
         'volume',
         'delivery_status',
         'overall_volume',
+        'schedule_date',
+        'schedule_time',
         'date_created',
         'date_updated',
     ];
@@ -26,6 +28,8 @@ class TrackingDelivery extends Model
     protected $casts = [
         'volume' => 'float',
         'overall_volume' => 'float',
+        'schedule_date' => 'date',
+        'schedule_time' => 'string',
         'date_created' => 'datetime:Y-m-d H:i:s',
         'date_updated' => 'datetime:Y-m-d H:i:s',
     ];

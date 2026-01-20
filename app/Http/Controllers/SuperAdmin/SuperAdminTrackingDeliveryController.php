@@ -11,43 +11,33 @@ use Inertia\Inertia;
 
 class SuperAdminTrackingDeliveryController extends Controller
 {
-    // Show deliveries for a transaction (Inertia page)
-    public function index($transacId)
-    {
-        $transaction = Transaction::with(['deliveries.equipment', 'customer', 'equipment', 'item'])
-            ->findOrFail($transacId);
-
-        return Inertia::render('SuperAdmin/TrackingDeliveries/Index', [
-            'transaction' => $transaction,
-            'equipment' => Equipment::all(),
-        ]);
-    }
-
     // Store a new delivery
-    public function store(Request $request, $transacId)
+    public function store(Request $request, $transactionId)
     {
-        $transaction = Transaction::findOrFail($transacId);
+        $transaction = Transaction::findOrFail($transactionId);
 
         $validated = $request->validate([
             'mp_no' => 'required|string|max:255',
             'volume' => 'required|numeric|min:0',
             'fk_equipment_id' => 'required|exists:equipment,pk_equipment_id',
             'delivery_status' => 'required|string',
+            'schedule_date' => 'nullable|date',
+            'schedule_time' => 'nullable|string',
         ]);
 
         TrackingDelivery::create([
             ...$validated,
-            'fk_transac_id' => $transacId,
-            'overall_volume' => $validated['volume'], // adjust if cumulative
+            'fk_transac_id' => $transactionId,
+            'overall_volume' => $validated['volume'],
             'date_created' => now(),
         ]);
 
-        return redirect()->route('superadmin.trackingdeliveries.index', $transacId)
+        return redirect()->route('transactions.index')
             ->with('success', 'Delivery added successfully!');
     }
 
     // Update delivery
-    public function update(Request $request, $id)
+    public function update(Request $request, $transactionId, $id)
     {
         $delivery = TrackingDelivery::findOrFail($id);
 
@@ -56,23 +46,41 @@ class SuperAdminTrackingDeliveryController extends Controller
             'volume' => 'required|numeric|min:0',
             'fk_equipment_id' => 'required|exists:equipment,pk_equipment_id',
             'delivery_status' => 'required|string',
+            'schedule_date' => 'nullable|date',
+            'schedule_time' => 'nullable|string',
         ]);
 
         $delivery->update([...$validated, 'date_updated' => now()]);
 
-        return redirect()->route('superadmin.trackingdeliveries.index', $delivery->fk_transac_id)
+        return redirect()->route('transactions.index')
             ->with('success', 'Delivery updated successfully!');
     }
 
     // Delete delivery
-    public function destroy($id)
+    public function destroy($transactionId, $id)
     {
         $delivery = TrackingDelivery::findOrFail($id);
-        $transactionId = $delivery->fk_transac_id;
-
         $delivery->delete();
 
-        return redirect()->route('superadmin.trackingdeliveries.index', $transactionId)
+        return redirect()->route('transactions.index')
             ->with('success', 'Delivery deleted successfully!');
+    }
+
+    // Update truck/equipment for a delivery
+    public function updateTruck(Request $request, $delivery)
+    {
+        $deliveryModel = TrackingDelivery::findOrFail($delivery);
+        
+        $validated = $request->validate([
+            'fk_equipment_id' => 'required|exists:equipment,pk_equipment_id',
+        ]);
+
+        $deliveryModel->update([
+            'fk_equipment_id' => $validated['fk_equipment_id'],
+            'date_updated' => now(),
+        ]);
+
+        return redirect()->route('transactions.index')
+            ->with('success', 'Truck updated successfully!');
     }
 }

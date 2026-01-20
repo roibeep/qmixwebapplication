@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Customer;
-use App\Models\Equipment;
 use App\Models\ItemDesign;
 use App\Models\TrackingDelivery;
 
@@ -18,26 +17,25 @@ class Transaction extends Model
         'so_no',
         'total_delivery',
         'fk_customer_id',
-        'fk_equipment_id',
         'fk_item_id',
         'date_created',
         'date_updated',
+        'schedule_date',
+        'schedule_time',
     ];
 
     protected $casts = [
         'total_delivery' => 'float',
         'date_created' => 'datetime:Y-m-d H:i:s',
         'date_updated' => 'datetime:Y-m-d H:i:s',
+        'schedule_date' => 'date:Y-m-d',
+        'schedule_time' => 'string',
     ];
 
+    // Relationships
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'fk_customer_id', 'pk_customer_id');
-    }
-
-    public function equipment()
-    {
-        return $this->belongsTo(Equipment::class, 'fk_equipment_id', 'pk_equipment_id');
     }
 
     public function item()

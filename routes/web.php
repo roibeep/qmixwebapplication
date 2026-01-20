@@ -78,22 +78,17 @@ Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->group(func
         //->name('superadmin.project.deliveries');
     //Route::post('/projects/{projectID}/deliveries', [SuperAdminTrackingDeliveryController::class, 'store']);
 
-    // Super Admin Transaction
+    /// Super Admin Transaction
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::post('/transactions/store', [TransactionController::class, 'store'])->name('transactions.store');
     Route::put('/transactions/{id}', [TransactionController::class, 'update'])->name('transactions.update');
     Route::delete('/transactions/{id}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
 
-    // Show deliveries for a transaction
-    Route::get('transactions/{id}/deliveries', [TransactionController::class, 'deliveries'])->name('transactions.deliveries');
-    
-    // Super Admin Tracking Deliveries
-    //Route::get('/trackingdelivery', [SuperAdminTrackingDeliveryController::class, 'index'])->name('superadmin.tracking');
-    //Route::get('/trackingdelivery/list', [SuperAdminTrackingDeliveryController::class, 'list']);
-    //Route::post('/trackingdelivery/store', [SuperAdminTrackingDeliveryController::class, 'store'])->name('superadmin.tracking.store');
-    //Route::get('/trackingdelivery/{id}', [SuperAdminTrackingDeliveryController::class, 'show'])->name('superadmin.tracking.show');
-    //Route::put('/trackingdelivery/{id}', [SuperAdminTrackingDeliveryController::class, 'update'])->name('superadmin.tracking.update');
-    //Route::delete('/trackingdelivery/{id}', [SuperAdminTrackingDeliveryController::class, 'destroy'])->name('superadmin.tracking.destroy');
+    // Transaction Deliveries
+    Route::post('/transactions/{id}/deliveries', [SuperAdminTrackingDeliveryController::class, 'store'])->name('superadmin.trackingdeliveries.store');
+    Route::put('/transactions/{transactionId}/deliveries/{id}', [SuperAdminTrackingDeliveryController::class, 'update'])->name('superadmin.trackingdeliveries.update');
+    Route::delete('/transactions/{transactionId}/deliveries/{id}', [SuperAdminTrackingDeliveryController::class, 'destroy'])->name('superadmin.trackingdeliveries.destroy');
+    Route::put('/deliveries/{delivery}/update-truck', [SuperAdminTrackingDeliveryController::class, 'updateTruck'])->name('deliveries.updateTruck');
 
     // Super Admin Reviews
     Route::get('/reviews', [SuperAdminReviewController::class, 'index'])->name('superadmin.reviews');
