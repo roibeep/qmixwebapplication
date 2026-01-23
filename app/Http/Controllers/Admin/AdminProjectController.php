@@ -3,34 +3,27 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Project;
+use App\Models\Transaction;
+use App\Models\Equipment;
+use App\Models\TrackingDelivery;
 use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
 class AdminProjectController extends Controller
 {
-    public function indexAdmin(Request $request)
+    public function index()
     {
-        $search = $request->input('search');
-
-        $projectsQuery = Project::with('customer')->orderBy('projectID');
-
-        if (!empty($search)) {
-            $projectsQuery->where('name', 'like', "%{$search}%")
-                    ->orWhereHas('customer', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    });
-        }
-
-        $projects = $projectsQuery->get();
-
-        $clients = User::where('role', 'client')->get();
+        // Get ALL transactions with relationships
+        $transactions = Transaction::with(['customer', 'item', 'deliveries.equipment'])
+            ->orderBy('date_created')
+            ->get();
+        
+        $equipment = Equipment::all();
 
         return Inertia::render('Admin/Projects/Index', [
-            'projects' => $projects,
-            'clients' => $clients,
-            'filters' => $request->only('search')
+            'transactions' => $transactions,
+            'equipment' => $equipment,
         ]);
     }
 }

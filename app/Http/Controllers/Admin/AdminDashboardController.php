@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Department;
-use App\Models\Project;
+use App\Models\Transaction;
 use App\Models\TrackingDelivery;
 use Inertia\Inertia;
 
@@ -13,21 +13,25 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        // Get summary statistics - ALL data (same as SuperAdmin)
+        // Get summary statistics
         $stats = [
             'total_users' => User::count(),
             'total_departments' => Department::count(),
-            'total_projects' => Project::count(),
+            'total_clients' => User::where('role', 'client')->count(),
+            'total_transactions' => Transaction::count(),
             'total_deliveries' => TrackingDelivery::count(),
         ];
 
-        // Get ALL users with their data (same as SuperAdmin)
+        // Get ALL users with their data
         $users = User::with(['department'])
             ->get()
             ->map(function ($user) {
-                $projectsCount = Project::where('customerID', $user->id)->count();
-                $deliveriesCount = TrackingDelivery::whereHas('project', function ($query) use ($user) {
-                    $query->where('customerID', $user->id);
+                // Count transactions for this user (if they're a client)
+                $transactionsCount = Transaction::where('fk_customer_id', $user->id)->count();
+                
+                // Count deliveries for this user's transactions
+                $deliveriesCount = TrackingDelivery::whereHas('transaction', function ($query) use ($user) {
+                    $query->where('fk_customer_id', $user->id);
                 })->count();
 
                 return [
@@ -37,7 +41,11 @@ class AdminDashboardController extends Controller
                     'role' => $user->role,
                     'department' => $user->department?->name ?? 'N/A',
                     'departmentID' => $user->departmentID,
-                    'projects_count' => $projectsCount,
+                    'customer_name' => $user->customer_name ?? null,
+                    'contact_person' => $user->contact_person ?? null,
+                    'contact_number' => $user->contact_number ?? null,
+                    'address' => $user->address ?? null,
+                    'transactions_count' => $transactionsCount,
                     'deliveries_count' => $deliveriesCount,
                 ];
             });

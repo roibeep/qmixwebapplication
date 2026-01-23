@@ -12,7 +12,7 @@ class EmployeesController extends Controller
     // Show Employees page
     public function index()
     {
-        $employees = Employee::orderBy('pk_employee_id', 'desc')->get();
+        $employees = Employee::orderBy('pk_employee_id')->get();
 
         return Inertia::render('SuperAdmin/Employees/Index', [
             'employees' => $employees,

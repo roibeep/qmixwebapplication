@@ -13,14 +13,14 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function AdminUserIndex() {
   const { users } = usePage<{ users: any[] }>().props;
 
-  // ✅ Search State
+  // Search state
   const [search, setSearch] = useState('');
 
-  // ✅ Filtered Users
+  // Filtered users
   const filteredUsers = useMemo(() => {
     if (!search) return users;
-
     const q = search.toLowerCase();
+
     return users.filter((user) =>
       user.name.toLowerCase().includes(q) ||
       user.email.toLowerCase().includes(q) ||
@@ -32,59 +32,54 @@ export default function AdminUserIndex() {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Card className="p-6 rounded-none">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Users</h1>
         </div>
-        <div className="flex justify-between items-center">
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <Input
-              placeholder="Search users..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+        
+        <div className="mb-4 w-64 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Input
+            placeholder="Search users..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10"
+          />
         </div>
 
         {/* Table */}
-        <table className="min-w-full border text-sm rounded-lg">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-2 text-left font-semibold">#</th>
-              <th className="px-4 py-2 text-left font-semibold">Name</th>
-              <th className="px-4 py-2 text-left font-semibold">Email</th>
-              <th className="px-4 py-2 text-left font-semibold">Department</th>
-              <th className="px-4 py-2 text-left font-semibold">Role</th>
-              <th className="px-4 py-2 text-left font-semibold w-40"></th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredUsers.length > 0 ? (
-              filteredUsers.map((user, index) => (
-                <tr key={user.id} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-2">{index + 1}</td>
-                  <td className="px-4 py-2">{user.name}</td>
-                  <td className="px-4 py-2">{user.email}</td>
-                  <td className="px-4 py-2">
-                    {user.department?.name ?? '-'}
-                  </td>
-                  <td className="px-4 py-2">{user.role}</td>
-                  <td className="px-4 py-2 flex gap-2"></td>
-                  <td className="px-4 py-2 flex gap-2"></td>
-                  <td className="px-4 py-2 flex gap-2 w-40"></td>
-                </tr>
-              ))
-            ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full border text-sm">
+            <thead className="bg-gray-100">
               <tr>
-                <td colSpan={5} className="text-center py-4">
-                  No users found.
-                </td>
+                <th className="px-4 py-2 text-left font-semibold">#</th>
+                <th className="px-4 py-2 text-left font-semibold">Name</th>
+                <th className="px-4 py-2 text-left font-semibold">Email</th>
+                <th className="px-4 py-2 text-left font-semibold">Department</th>
+                <th className="px-4 py-2 text-left font-semibold">Role</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map((user, index) => (
+                  <tr key={user.id} className="border-b hover:bg-gray-50">
+                    <td className="px-4 py-2">{index + 1}</td>
+                    <td className="px-4 py-2">{user.name}</td>
+                    <td className="px-4 py-2">{user.email}</td>
+                    <td className="px-4 py-2">{user.department?.name ?? '-'}</td>
+                    <td className="px-4 py-2">{user.role}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="text-center py-4 text-gray-500">
+                    No users found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </Card>
     </AppLayout>
   );

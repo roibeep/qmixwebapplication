@@ -1,0 +1,37 @@
+SET-UP--
+folder name: qmixwebapplication
+
+-Copy the folder (USB or any external disk)
+-Install Xampp (https://www.apachefriends.org/download.html)
+-Go to This PC then Drive C, find the xampp folder
+-Open htdocs
+-Paste the folder (qmixapplication)
+-Open VSCode
+-Go to Terminal, type "php artisan serve" (for local host only)
+-Add new Terminal, type "npm run build" (to build and optimize the frontend)
+
+ACCOUNTS--
+
+Super Admin account:
+email: superadmin@example.com
+password: password123
+
+Admin account:
+email: admin@example.com
+password: password123
+
+Client:
+email: mindara@gmail.com
+password: Mindara123
+
+SYSTEM LAST UPDATE--
+
+-Logs Page not yet done...
+-Super Admin side functioning except Logs Section
+-Client side functioning
+
+-Hosting the web application not yet done...
+-Improve user experience (filtering, account limitation, etc)
+-Improve user management 
+
+Note: The folder name of "Customer" in Client, Admin is Project

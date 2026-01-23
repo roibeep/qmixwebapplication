@@ -14,7 +14,7 @@ class EquipmentController extends Controller
     public function index()
     {
         $equipment = Equipment::with('employee')
-            ->orderBy('pk_equipment_id', 'desc')
+            ->orderBy('pk_equipment_id')
             ->get();
 
         $employees = Employee::all();

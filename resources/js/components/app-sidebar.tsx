@@ -38,7 +38,7 @@ export function AppSidebar() {
                     : userRole === 'admin'
                     ? '/admin/dashboard'
                     : userRole === 'client'
-                    ? '/client/dashboard'
+                    ? '/client/projects' // Client goes straight to projects
                     : userRole === 'user'
                     ? '/user/dashboard'
                     : dashboard(),
@@ -59,9 +59,8 @@ export function AppSidebar() {
             title: 'Records',
             icon: Cuboid,
             children: [
-                { title: 'Project', href: '/superadmin/projects' },
-                { title: 'Logs', href: '/superadmin/trackingdelivery' },
                 { title: 'Transaction', href: '/superadmin/transactions' },
+                { title: 'Logs', href: '/superadmin/trackingdelivery' },
             ],
         },
         {
@@ -75,7 +74,7 @@ export function AppSidebar() {
         },
     ];
 
-    // ======== Admin User Footer Nav (near profile) ========
+    // ======== SuperAdmin User Footer Nav (near profile) ========
     const superAdminFooterNav: NavItem[] = [
         {
             title: 'Admin User',
@@ -88,20 +87,67 @@ export function AppSidebar() {
         },
     ];
 
-    // ======== Other Roles ========
-    const adminNavItems: NavItem[] = [
-        { title: 'Users', href: '/admin/users', icon: UsersRound },
-        { title: 'Departments', href: '/admin/department', icon: IdCard },
-        { title: 'Projects', href: '/admin/projects', icon: Cuboid },
+    // ======== Admin Top Nav ========
+    const AdminTopNav: NavItem[] = [
+        {
+            title: 'Customer',
+            icon: UsersRound,
+            children: [
+                { title: 'Manage Customer', href: '/admin/customers' },
+            ],
+        },
+        {
+            title: 'Records',
+            icon: Cuboid,
+            children: [
+                { title: 'Transaction', href: '/admin/projects' },
+                { title: 'Logs', href: '/admin/trackingdelivery' },
+            ],
+        },
+        {
+            title: 'Resources',
+            icon: UsersRound,
+            children: [
+                { title: 'Item Design', href: '/admin/itemdesign' },
+                { title: 'Equipment', href: '/admin/equipment' },
+                { title: 'Employees', href: '/admin/employees' },
+            ],
+        },
     ];
 
-    const clientNavItems: NavItem[] = [
-        { title: 'Manage Delivery', href: '/client/projects', icon: Cuboid },
-        { title: 'Reviews', href: '/client/reviews', icon: Archive },
+    // ======== Admin User Footer Nav (near profile) ========
+    const AdminFooterNav: NavItem[] = [
+        {
+            title: 'Admin User',
+            icon: IdCard,
+            children: [
+                { title: 'Manage Users', href: '/admin/users' },
+                { title: 'Manage Department', href: '/admin/department' },
+                { title: 'Reviews', href: '/admin/reviews' },
+            ],
+        },
     ];
 
-    const userProjectNavItems: NavItem[] = [
-        { title: 'Manage Projects', href: '/user/projects', icon: Cuboid },
+    // ======== Client Top Nav (Records Section) ========
+    const clientTopNav: NavItem[] = [
+        {
+            title: 'Records',
+            icon: Cuboid,
+            children: [
+                { title: 'Transaction', href: '/client/projects' },
+            ],
+        },
+    ];
+
+    // ======== User PRD Top Nav (Records Section) ========
+    const userPRDTopNav: NavItem[] = [
+        {
+            title: 'Records',
+            icon: Cuboid,
+            children: [
+                { title: 'Transaction', href: '/user/projects' },
+            ],
+        },
     ];
 
     // ======== Role-Based Top Nav ========
@@ -110,11 +156,11 @@ export function AppSidebar() {
     if (userRole === 'superadmin') {
         roleBasedTopNav = [...roleBasedTopNav, ...superAdminTopNav];
     } else if (userRole === 'admin') {
-        roleBasedTopNav = [...roleBasedTopNav, ...adminNavItems];
+        roleBasedTopNav = [...roleBasedTopNav, ...AdminTopNav];
     } else if (userRole === 'client') {
-        roleBasedTopNav = [...roleBasedTopNav, ...clientNavItems];
+        roleBasedTopNav = [...roleBasedTopNav, ...clientTopNav]; // Use Records section
     } else if (userRole === 'user' && userDepartment === 'PRD Department') {
-        roleBasedTopNav = [...roleBasedTopNav, ...userProjectNavItems];
+        roleBasedTopNav = [...roleBasedTopNav, ...userPRDTopNav];
     }
 
     const footerNavItems: NavItem[] = [];
@@ -141,6 +187,7 @@ export function AppSidebar() {
             {/* ======== Footer Nav near profile ======== */}
             <SidebarFooter className="flex flex-col gap-2">
                 {userRole === 'superadmin' && <NavMain items={superAdminFooterNav} />}
+                {userRole === 'admin' && <NavMain items={AdminFooterNav} />}
                 <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>

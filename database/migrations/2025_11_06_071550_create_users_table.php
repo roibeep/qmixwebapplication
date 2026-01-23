@@ -20,8 +20,14 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+            
             $table->unsignedBigInteger('departmentID')->nullable();
             $table->foreign('departmentID')->references('departmentID')->on('departments')->onDelete('set null');
+            
+            $table->string('customer_name')->nullable();
+            $table->string('contact_person')->nullable();
+            $table->string('contact_number')->nullable();
+            $table->text('address')->nullable();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

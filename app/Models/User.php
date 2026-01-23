@@ -22,6 +22,10 @@ class User extends Authenticatable
         'password',
         'role',
         'departmentID',
+        'customer_name',      // ADDED for clients
+        'contact_person',     // ADDED for clients
+        'contact_number',     // ADDED for clients
+        'address',            // ADDED for clients
     ];
 
     /**
@@ -74,5 +78,11 @@ class User extends Authenticatable
     public function projects()
     {
         return $this->hasMany(Project::class, 'customerID');
-    } 
+    }
+    
+    // ADDED: Helper to check if user is a client
+    public function isClient(): bool
+    {
+        return $this->role === 'client';
+    }
 }

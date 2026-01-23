@@ -19,6 +19,10 @@ use App\Http\Controllers\Admin\AdminTrackingDeliveryController;
 use App\Http\Controllers\Admin\AdminDepartmentController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminEquipmentController;
+use App\Http\Controllers\Admin\AdminEmployeesController;
+use App\Http\Controllers\Admin\AdminItemDesignController;
+use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Client\ClientProjectController;
 use App\Http\Controllers\Client\ClientReviewController;
 use App\Http\Controllers\User\UserProjectController;
@@ -140,8 +144,20 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/department', [AdminDepartmentController::class, 'indexAdmin'])->name('admin.department');
 
     // Admin Projects
-    Route::get('/projects', [AdminProjectController::class, 'indexAdmin'])->name('admin.projects');
+    Route::get('/projects', [AdminProjectController::class, 'index'])->name('admin.projects');
     Route::get('/projects/{projectID}/deliveries', [AdminTrackingDeliveryController::class, 'getByProject']);
+
+    //Admin Employees
+    Route::get('/employees', [AdminEmployeesController::class, 'index'])->name('admin.employees.index');
+
+    //Admin Equipment
+    Route::get('/equipment', [AdminEquipmentController::class, 'index'])->name('admin.equipment.index');
+
+    //Super Admin Item Design
+    Route::get('/itemdesign', [AdminItemDesignController::class, 'index'])->name('admin.itemdesign.index');
+
+    //Super Admin Customer
+    Route::get('/customers', [AdminCustomerController::class, 'index'])->name('admin.customer.index');
 
 });
 
@@ -150,6 +166,8 @@ Route::middleware(['auth', 'role:client'])->prefix('client')->name('client.')->g
     // Client Projects
     Route::get('/projects', [ClientProjectController::class, 'index'])->name('projects.index');
     Route::get('/projects/{id}/deliveries', [ClientProjectController::class, 'deliveries'])->name('projects.deliveries');
+    Route::put('/deliveries/{deliveryId}/mark-delivered', [ClientProjectController::class, 'markDelivered'])->name('deliveries.mark-delivered');
+    Route::put('/deliveries/{deliveryId}/mark-out-for-delivery', [ClientProjectController::class, 'markOutForDelivery'])->name('deliveries.mark-out-for-delivery');
 
     // Client Reviews
     Route::get('/reviews', [ClientReviewController::class, 'index'])->name('reviews.index');

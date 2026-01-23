@@ -4,7 +4,7 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
-use App\Models\Customer;
+use App\Models\User; // Changed from Customer
 use App\Models\ItemDesign;
 use App\Models\TrackingDelivery;
 use App\Models\Equipment;
@@ -17,8 +17,10 @@ class TransactionController extends Controller
     public function index()
     {
         return Inertia::render('SuperAdmin/Transactions/Index', [
-            'transactions' => Transaction::with(['customer', 'item', 'deliveries.equipment'])->get(),
-            'customers' => Customer::all(),
+            'transactions' => Transaction::with(['customer', 'item', 'deliveries.equipment'])
+                ->orderBy('date_created', 'desc')
+                ->get(),
+            'customers' => User::where('role', 'client')->get(), // Changed: Get only client users
             'items' => ItemDesign::all(),
             'equipment' => Equipment::all(),
         ]);
@@ -30,7 +32,7 @@ class TransactionController extends Controller
         $validated = $request->validate([
             'so_no' => 'required|string|unique:transactions,so_no',
             'total_delivery' => 'required|numeric|min:0',
-            'fk_customer_id' => 'required|exists:customers,pk_customer_id',
+            'fk_customer_id' => 'required|exists:users,id', // Changed: Check in users table
             'fk_item_id' => 'nullable|exists:items,pk_item_id',
             'schedule_date' => 'nullable|date',
             'schedule_time' => 'nullable',
@@ -52,7 +54,7 @@ class TransactionController extends Controller
         $validated = $request->validate([
             'so_no' => 'required|string|unique:transactions,so_no,' . $transaction->pk_transac_id . ',pk_transac_id',
             'total_delivery' => 'required|numeric|min:0',
-            'fk_customer_id' => 'required|exists:customers,pk_customer_id',
+            'fk_customer_id' => 'required|exists:users,id', // Changed: Check in users table
             'fk_item_id' => 'nullable|exists:items,pk_item_id',
             'schedule_date' => 'nullable|date',
             'schedule_time' => 'nullable',

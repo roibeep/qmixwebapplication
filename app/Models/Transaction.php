@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Customer;
+use App\Models\User; // Changed from Customer
 use App\Models\ItemDesign;
 use App\Models\TrackingDelivery;
 
@@ -35,7 +35,8 @@ class Transaction extends Model
     // Relationships
     public function customer()
     {
-        return $this->belongsTo(Customer::class, 'fk_customer_id', 'pk_customer_id');
+        // Changed: Now points to User model with 'id' as the foreign key
+        return $this->belongsTo(User::class, 'fk_customer_id', 'id');
     }
 
     public function item()

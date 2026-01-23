@@ -10,7 +10,14 @@ import { Search, FileText, CalendarClock, Loader, Truck, CheckCircle } from 'luc
 import { type BreadcrumbItem } from '@/types';
 import React from 'react';
 
-interface Customer { pk_customer_id: number; customer_name: string; }
+// UPDATED INTERFACES
+interface Customer { 
+  id: number; 
+  name: string; 
+  customer_name?: string; 
+  email: string;
+}
+
 interface Item { pk_item_id: number; item_name: string; }
 interface Equipment { pk_equipment_id: number; equipment_name: string; }
 
@@ -33,6 +40,7 @@ interface Transaction {
   date_created: string;
   schedule_date?: string | null;
   schedule_time?: string | null;
+  fk_customer_id: number;
   customer?: Customer | null;
   item?: Item | null;
   deliveries?: Delivery[];
@@ -78,6 +86,26 @@ export default function TransactionIndex() {
   const currentUser = auth.user;
   const isAuthorized = currentUser.role?.toLowerCase() === 'superadmin';
 
+  // Helper function to get customer display name
+  const getCustomerName = (customer: Customer | null | undefined) => {
+    if (!customer) return '-';
+    return customer.customer_name || customer.name || customer.email;
+  };
+
+  // Helper function to format time to 12-hour AM/PM format
+  const formatTime = (time: string | null | undefined) => {
+    if (!time) return '-';
+    
+    const [hours, minutes] = time.split(':');
+    const hour = parseInt(hours, 10);
+    const minute = minutes || '00';
+    
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    
+    return `${hour12}:${minute} ${period}`;
+  };
+
   // --------------- STATE -----------------
   const [search, setSearch] = useState('');
   const [openTransactionDialog, setOpenTransactionDialog] = useState(false);
@@ -116,7 +144,7 @@ export default function TransactionIndex() {
     return transactions.filter(
       t =>
         t.so_no.toLowerCase().includes(q) ||
-        t.customer?.customer_name.toLowerCase().includes(q) ||
+        getCustomerName(t.customer).toLowerCase().includes(q) ||
         t.item?.item_name.toLowerCase().includes(q)
     );
   }, [search, transactions]);
@@ -148,7 +176,7 @@ export default function TransactionIndex() {
     setTransactionForm({
       so_no: t.so_no,
       total_delivery: String(t.total_delivery ?? ''),
-      fk_customer_id: t.customer?.pk_customer_id ?? null,
+      fk_customer_id: t.customer?.id ?? null, // Changed from pk_customer_id to id
       fk_item_id: t.item?.pk_item_id ?? null,
       schedule_date: t.schedule_date ?? '',
       schedule_time: t.schedule_time ?? '',
@@ -235,7 +263,7 @@ export default function TransactionIndex() {
         deliveryForm,
         {
           preserveScroll: true,
-          onSuccess: (page) => {
+          onSuccess: (page: any) => {
             setOpenAddDeliveryDialog(false);
             // Update the selected transaction with fresh data
             const updatedTransaction = page.props.transactions.find(
@@ -255,7 +283,7 @@ export default function TransactionIndex() {
         deliveryForm,
         {
           preserveScroll: true,
-          onSuccess: (page) => {
+          onSuccess: (page: any) => {
             setOpenAddDeliveryDialog(false);
             // Update the selected transaction with fresh data
             const updatedTransaction = page.props.transactions.find(
@@ -279,7 +307,7 @@ export default function TransactionIndex() {
       `/superadmin/transactions/${selectedTransaction.pk_transac_id}/deliveries/${id}`,
       {
         preserveScroll: true,
-        onSuccess: (page) => {
+        onSuccess: (page: any) => {
           // Update the selected transaction with fresh data
           const updatedTransaction = page.props.transactions.find(
             (t: Transaction) => t.pk_transac_id === selectedTransaction.pk_transac_id
@@ -324,14 +352,14 @@ export default function TransactionIndex() {
           <table className="min-w-full border text-sm">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-4 py-2">#</th>
-                <th className="px-4 py-2">SO No.</th>
-                <th className="px-4 py-2">Customer</th>
-                <th className="px-4 py-2">Item</th>
-                <th className="px-4 py-2">Total Delivery</th>
-                <th className="px-4 py-2">Schedule Date</th>
-                <th className="px-4 py-2">Schedule Time</th>
-                <th className="px-4 py-2">Deliveries</th>
+                <th className="px-4 py-2 text-left font-semibold">#</th>
+                <th className="px-4 py-2 text-left font-semibold">SO No.</th>
+                <th className="px-4 py-2 text-left font-semibold">Customer</th>
+                <th className="px-4 py-2 text-left font-semibold">Item</th>
+                <th className="px-4 py-2 text-left font-semibold">Total Delivery</th>
+                <th className="px-4 py-2 text-left font-semibold">Schedule Date</th>
+                <th className="px-4 py-2 text-left font-semibold">Schedule Time</th>
+                <th className="px-4 py-2 text-left font-semibold">Deliveries</th>
                 {isAuthorized && <th className="px-4 py-2">Actions</th>}
               </tr>
             </thead>
@@ -341,11 +369,11 @@ export default function TransactionIndex() {
                 <tr key={t.pk_transac_id} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-2">{i + 1}</td>
                   <td className="px-4 py-2">{t.so_no}</td>
-                  <td className="px-4 py-2">{t.customer?.customer_name ?? '-'}</td>
+                  <td className="px-4 py-2">{getCustomerName(t.customer)}</td>
                   <td className="px-4 py-2">{t.item?.item_name ?? '-'}</td>
                   <td className="px-4 py-2">{t.total_delivery}</td>
                   <td className="px-4 py-2">{t.schedule_date ?? '-'}</td>
-                  <td className="px-4 py-2">{t.schedule_time ?? '-'}</td>
+                  <td className="px-4 py-2">{formatTime(t.schedule_time)}</td>
                   <td className="px-4 py-2">
                     <Button size="sm" onClick={() => openDeliveryList(t)}>View Deliveries</Button>
                   </td>
@@ -386,7 +414,7 @@ export default function TransactionIndex() {
             <div>
               <label className="text-sm font-medium text-gray-600">Customer</label>
               <p className="mt-1 p-2 border rounded bg-gray-50">
-                {selectedTransaction?.customer?.customer_name ?? "-"}
+                {getCustomerName(selectedTransaction?.customer)}
               </p>
             </div>
             <div>
@@ -410,7 +438,7 @@ export default function TransactionIndex() {
             <div>
               <label className="text-sm font-medium text-gray-600">Schedule Time</label>
               <p className="mt-1 p-2 border rounded bg-gray-50">
-                {selectedTransaction?.schedule_time ?? "-"}
+                {formatTime(selectedTransaction?.schedule_time)}
               </p>
             </div>
             <div>
@@ -448,24 +476,9 @@ export default function TransactionIndex() {
                   {deliveryWithOverallVolume.length ? deliveryWithOverallVolume.map(d => (
                     <tr key={d.pk_delivery_id} className="border-b hover:bg-gray-50">
                       <td className="px-4 py-2">{d.mp_no}</td>
-                      <td className="px-4 py-2">
-                        <select
-                          value={d.fk_equipment_id ?? ''}
-                          onChange={(e) =>
-                            updateDeliveryTruck(d.pk_delivery_id, Number(e.target.value))
-                          }
-                          className="border rounded px-2 py-1 text-sm w-full"
-                        >
-                          <option value="">-- Select Truck --</option>
-                          {equipment.map(eq => (
-                            <option key={eq.pk_equipment_id} value={eq.pk_equipment_id}>
-                              {eq.equipment_name}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
+                      <td className="px-4 py-2">{d.fk_equipment_id ?? ''}</td>
                       <td className="px-4 py-2">{d.schedule_date ?? '-'}</td>
-                      <td className="px-4 py-2">{d.schedule_time ?? '-'}</td>
+                      <td className="px-4 py-2">{formatTime(d.schedule_time)}</td>
                       <td className="px-4 py-2">{d.volume}</td>
                       <td className="px-4 py-2 font-bold text-blue-600">{d.overall_volume}</td>
                       <td className="px-4 py-2"><StatusBadge status={d.delivery_status} /></td>
@@ -517,7 +530,9 @@ export default function TransactionIndex() {
               >
                 <option value="">-- Select Customer --</option>
                 {customers.map(c => (
-                  <option key={c.pk_customer_id} value={c.pk_customer_id}>{c.customer_name}</option>
+                  <option key={c.id} value={c.id}>
+                    {c.customer_name || c.name}
+                  </option>
                 ))}
               </select>
             </div>

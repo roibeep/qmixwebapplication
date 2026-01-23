@@ -10,10 +10,10 @@
 
 // Configuration - REPLACE WITH YOUR EMAILJS DETAILS
 const EMAIL_CONFIG = {
-    serviceId: 'service_92kw5dd',        // Replace with your EmailJS service ID
-    templateId: 'template_9nkuxrd',      // Replace with your EmailJS template ID
-    publicKey: 'GGFG7STxBE6ezHAlP',        // Replace with your EmailJS public key
-    toEmail: 'roi041400@gmail.com'      // Replace with your email address
+    serviceId: 'service_3irdylo',        // Replace with your EmailJS service ID
+    templateId: 'template_7rql2td',      // Replace with your EmailJS template ID
+    publicKey: 'lmJdVccIklS_hezDE',        // Replace with your EmailJS public key
+    toEmail: 'qmixitsdepartment@gmail.com'      // Replace with your email address
 };
 
 /**

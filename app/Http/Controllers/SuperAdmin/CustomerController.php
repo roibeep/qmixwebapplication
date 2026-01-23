@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Customer;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
@@ -12,7 +12,10 @@ class CustomerController extends Controller
 {
     public function index()
     {
-        $customers = Customer::orderBy('pk_customer_id')->get();
+        // Get only users with role 'client'
+        $customers = User::where('role', 'client')
+            ->orderBy('id')
+            ->get();
 
         return Inertia::render('SuperAdmin/Customers/Index', [
             'customers' => $customers,
@@ -26,11 +29,12 @@ class CustomerController extends Controller
             'contact_person'  => 'required|string|max:255',
             'contact_number'  => 'required|string|max:50',
             'address'         => 'required|string',
-            'email'           => 'required|email|unique:customers,email',
+            'email'           => 'required|email|unique:users,email',
             'password'        => 'required|min:6',
         ]);
 
-        Customer::create([
+        User::create([
+            'name'           => $validated['customer_name'], // Use 'name' for User model
             'customer_name'  => $validated['customer_name'],
             'contact_person' => $validated['contact_person'],
             'contact_number' => $validated['contact_number'],
@@ -38,6 +42,7 @@ class CustomerController extends Controller
             'email'          => $validated['email'],
             'password'       => Hash::make($validated['password']),
             'role'           => 'client',
+            'departmentID'   => null, // Clients don't have departments
         ]);
 
         return redirect()
@@ -47,19 +52,20 @@ class CustomerController extends Controller
 
     public function update(Request $request, $id)
     {
-        $customer = Customer::findOrFail($id);
+        // Find user with role 'client'
+        $customer = User::where('role', 'client')->findOrFail($id);
 
         $validated = $request->validate([
-            'customer_name'  => $validated['customer_name'],
-            'contact_person' => $validated['contact_person'],
-            'contact_number' => $validated['contact_number'],
-            'address'        => $validated['address'],
-            'email'          => $validated['email'],
-            'password'       => Hash::make($validated['password']),
-            'role'           => 'client',
+            'customer_name'  => 'required|string|max:255',
+            'contact_person' => 'required|string|max:255',
+            'contact_number' => 'required|string|max:50',
+            'address'        => 'required|string',
+            'email'          => 'required|email|unique:users,email,' . $id,
+            'password'       => 'nullable|min:6',
         ]);
 
         $updateData = [
+            'name'           => $validated['customer_name'],
             'customer_name'  => $validated['customer_name'],
             'contact_person' => $validated['contact_person'],
             'contact_number' => $validated['contact_number'],
@@ -80,7 +86,8 @@ class CustomerController extends Controller
 
     public function destroy($id)
     {
-        $customer = Customer::findOrFail($id);
+        // Find user with role 'client'
+        $customer = User::where('role', 'client')->findOrFail($id);
         $customer->delete();
 
         return redirect()
