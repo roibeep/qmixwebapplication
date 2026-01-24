@@ -47,7 +47,7 @@ interface Transaction {
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Manage Transactions', href: '/superadmin/transactions' },
+  { title: 'Manage Transactions', href: '/user/transactions' },
 ];
 
 // ----------------- StatusBadge -----------------
@@ -67,8 +67,8 @@ const StatusBadge = ({ status }: StatusBadgeProps) => {
   );
 };
 
-// ----------------- TransactionIndex -----------------
-export default function TransactionIndex() {
+// ----------------- UserTransactionIndex -----------------
+export default function UserTransactionIndex() {
   const { 
     transactions = [],     
     customers = [], 
@@ -84,7 +84,7 @@ export default function TransactionIndex() {
   }>().props;
 
   const currentUser = auth.user;
-  const isAuthorized = currentUser.role?.toLowerCase() === 'superadmin';
+  const isAuthorized = currentUser.role === 'user' && currentUser.department?.name === 'PRD Department';
 
   // Helper function to get customer display name
   const getCustomerName = (customer: Customer | null | undefined) => {
@@ -176,7 +176,7 @@ export default function TransactionIndex() {
     setTransactionForm({
       so_no: t.so_no,
       total_delivery: String(t.total_delivery ?? ''),
-      fk_customer_id: t.customer?.id ?? null, // Changed from pk_customer_id to id
+      fk_customer_id: t.customer?.id ?? null,
       fk_item_id: t.item?.pk_item_id ?? null,
       schedule_date: t.schedule_date ?? '',
       schedule_time: t.schedule_time ?? '',
@@ -201,11 +201,11 @@ export default function TransactionIndex() {
   const submitTransaction = (e: React.FormEvent) => {
     e.preventDefault();
     if (editTransactionId) {
-      router.put(`/superadmin/transactions/${editTransactionId}`, transactionForm, {
+      router.put(`/user/transactions/${editTransactionId}`, transactionForm, {
         onSuccess: () => router.reload({ only: ['transactions'] }),
       });
     } else {
-      router.post(`/superadmin/transactions/store`, transactionForm, {
+      router.post(`/user/transactions/store`, transactionForm, {
         onSuccess: () => router.reload({ only: ['transactions'] }),
       });
     }
@@ -214,7 +214,7 @@ export default function TransactionIndex() {
 
   const deleteTransaction = (id: number) => {
     if (!confirm('Are you sure you want to delete this transaction?')) return;
-    router.delete(`/superadmin/transactions/${id}`, {
+    router.delete(`/user/transactions/${id}`, {
       onSuccess: () => router.reload({ only: ['transactions'] }),
     });
   };
@@ -259,7 +259,7 @@ export default function TransactionIndex() {
     if (editDeliveryId) {
       // Update existing delivery
       router.put(
-        `/superadmin/transactions/${selectedTransaction.pk_transac_id}/deliveries/${editDeliveryId}`,
+        `/user/transactions/${selectedTransaction.pk_transac_id}/deliveries/${editDeliveryId}`,
         deliveryForm,
         {
           preserveScroll: true,
@@ -279,7 +279,7 @@ export default function TransactionIndex() {
     } else {
       // Add new delivery
       router.post(
-        `/superadmin/transactions/${selectedTransaction.pk_transac_id}/deliveries`,
+        `/user/transactions/${selectedTransaction.pk_transac_id}/deliveries`,
         deliveryForm,
         {
           preserveScroll: true,
@@ -304,7 +304,7 @@ export default function TransactionIndex() {
     if (!selectedTransaction) return;
 
     router.delete(
-      `/superadmin/transactions/${selectedTransaction.pk_transac_id}/deliveries/${id}`,
+      `/user/transactions/${selectedTransaction.pk_transac_id}/deliveries/${id}`,
       {
         preserveScroll: true,
         onSuccess: (page: any) => {
@@ -319,24 +319,6 @@ export default function TransactionIndex() {
         },
       }
     );
-  };
-
-  const updateDeliveryTruck = (deliveryId: number, equipmentId: number) => {
-    router.put(
-      `/superadmin/deliveries/${deliveryId}/update-truck`,
-      { fk_equipment_id: equipmentId },
-      {
-        preserveScroll: true,
-        onSuccess: () => {
-          router.reload({ only: ['transactions'] });
-        },
-      }
-    );
-  };
-
-  const getTotalDeliveredVolume = (deliveries: Delivery[] | undefined) => {
-    if (!deliveries || deliveries.length === 0) return 0;
-    return deliveries.reduce((sum, d) => sum + Number(d.volume), 0);
   };
 
   // ---------------- RENDER ----------------
@@ -429,9 +411,9 @@ export default function TransactionIndex() {
               </p>
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-600">Total Volume Delivered</label>
-              <p className="mt-1 p-2 border rounded bg-gray-50 font-semibold text-blue-600">
-                {getTotalDeliveredVolume(selectedTransaction?.deliveries)} / {selectedTransaction?.total_delivery ?? "-"}
+              <label className="text-sm font-medium text-gray-600">Total Delivery</label>
+              <p className="mt-1 p-2 border rounded bg-gray-50">
+                {selectedTransaction?.total_delivery ?? "-"}
               </p>
             </div>
             <div>
@@ -481,7 +463,7 @@ export default function TransactionIndex() {
                   {deliveryWithOverallVolume.length ? deliveryWithOverallVolume.map(d => (
                     <tr key={d.pk_delivery_id} className="border-b hover:bg-gray-50">
                       <td className="px-4 py-2">{d.mp_no}</td>
-                      <td className="px-4 py-2">{d.fk_equipment_id ?? ''}</td>
+                      <td className="px-4 py-2">{d.equipment?.equipment_name ?? 'Not assigned'}</td>
                       <td className="px-4 py-2">{d.schedule_date ?? '-'}</td>
                       <td className="px-4 py-2">{formatTime(d.schedule_time)}</td>
                       <td className="px-4 py-2">{d.volume}</td>
@@ -650,6 +632,15 @@ export default function TransactionIndex() {
                 <option value="Out for Delivery">Out for Delivery</option>
                 <option value="Delivered">Delivered</option>
               </select>
+            </div>
+
+            <div>
+              <Label>Schedule Date</Label>
+              <Input
+                type="date"
+                value={deliveryForm.schedule_date}
+                onChange={e => setDeliveryForm({ ...deliveryForm, schedule_date: e.target.value })}
+              />
             </div>
 
             <div>

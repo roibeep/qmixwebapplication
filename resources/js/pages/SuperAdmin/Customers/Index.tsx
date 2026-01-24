@@ -15,14 +15,14 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 interface Customer {
-  pk_customer_id: number;
+  id: number;  // ✅ Changed from pk_customer_id
   customer_name: string;
   contact_person: string;
   contact_number: string;
   address: string;
   email: string;
   role: string;
-  date_created: string;
+  created_at: string;  // ✅ Changed from date_created
 }
 
 export default function CustomerIndex() {
@@ -74,7 +74,7 @@ export default function CustomerIndex() {
       email: customer.email,
       password: '',
     });
-    setEditId(customer.pk_customer_id);
+    setEditId(customer.id);  // ✅ Changed from pk_customer_id
     setOpen(true);
   };
 
@@ -122,48 +122,61 @@ export default function CustomerIndex() {
         </div>
 
         {/* Table */}
-        <table className="min-w-full border text-sm">
-          <thead className="bg-gray-100 dark:bg-neutral-800">
-            <tr>
-              <th className="px-4 py-2 text-left">#</th>
-              <th className="px-4 py-2 text-left">Customer</th>
-              <th className="px-4 py-2 text-left">Contact Person</th>
-              <th className="px-4 py-2 text-left">Contact No</th>
-              <th className="px-4 py-2 text-left">Email</th>
-              <th className="px-4 py-2 text-left">Created</th>
-              <th className="px-4 py-2 text-left">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredCustomers.map((customer, index) => (
-              <tr key={customer.pk_customer_id} className="border-b">
-                <td className="px-4 py-2">{index + 1}</td>
-                <td className="px-4 py-2">{customer.customer_name}</td>
-                <td className="px-4 py-2">{customer.contact_person}</td>
-                <td className="px-4 py-2">{customer.contact_number}</td>
-                <td className="px-4 py-2">{customer.email}</td>
-                <td className="px-4 py-2">
-                  {new Date(customer.date_created).toLocaleDateString()}
-                </td>
-                <td className="px-4 py-2 flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => handleOpenEdit(customer)}>
-                    Edit
-                  </Button>
-                  <Button size="sm" variant="destructive" onClick={() => handleDelete(customer.pk_customer_id)}>
-                    Delete
-                  </Button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full border text-sm">
+            <thead className="bg-gray-100 dark:bg-neutral-800">
+              <tr>
+                <th className="px-4 py-2 text-left font-semibold">#</th>
+                <th className="px-4 py-2 text-left font-semibold">Customer</th>
+                <th className="px-4 py-2 text-left font-semibold">Contact Person</th>
+                <th className="px-4 py-2 text-left font-semibold">Contact No</th>
+                <th className="px-4 py-2 text-left font-semibold">Email</th>
+                <th className="px-4 py-2 text-left font-semibold">Created</th>
+                <th className="px-4 py-2 text-left font-semibold">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {filteredCustomers.length > 0 ? (
+                filteredCustomers.map((customer, index) => (
+                  <tr key={customer.id} className="border-b hover:bg-gray-50 dark:hover:bg-neutral-700">  {/* ✅ Changed */}
+                    <td className="px-4 py-2">{index + 1}</td>
+                    <td className="px-4 py-2">{customer.customer_name}</td>
+                    <td className="px-4 py-2">{customer.contact_person}</td>
+                    <td className="px-4 py-2">{customer.contact_number}</td>
+                    <td className="px-4 py-2">{customer.email}</td>
+                    <td className="px-4 py-2">
+                      {customer.created_at ? new Date(customer.created_at).toLocaleDateString() : '-'}  {/* ✅ Changed */}
+                    </td>
+                    <td className="px-4 py-2 flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => handleOpenEdit(customer)}>
+                        Edit
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={() => handleDelete(customer.id)}>  {/* ✅ Changed */}
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="text-center py-4 text-gray-500">
+                    No customers found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {/* Dialog */}
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent>
+          <DialogContent aria-describedby="customer-dialog-description">
             <DialogHeader>
               <DialogTitle>{editId ? 'Update Customer' : 'Add Customer'}</DialogTitle>
+              <p id="customer-dialog-description" className="text-sm text-gray-500 sr-only">
+                Fill in the customer information below
+              </p>
             </DialogHeader>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -219,6 +232,7 @@ export default function CustomerIndex() {
                   type="password"
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  required={!editId}
                 />
               </div>
 
@@ -227,7 +241,7 @@ export default function CustomerIndex() {
                   Cancel
                 </Button>
                 <Button type="submit">
-                  {editId ? 'Update' : 'Add'}
+                  {editId ? 'Update' : 'Add'}  {/* ✅ Fixed typo */}
                 </Button>
               </div>
             </form>

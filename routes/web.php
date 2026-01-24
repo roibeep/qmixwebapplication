@@ -25,8 +25,10 @@ use App\Http\Controllers\Admin\AdminItemDesignController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Client\ClientProjectController;
 use App\Http\Controllers\Client\ClientReviewController;
-use App\Http\Controllers\User\UserProjectController;
+use App\Http\Controllers\Client\ClientDashboardController;
 use App\Http\Controllers\User\UserTrackingDeliveryController;
+use App\Http\Controllers\User\UserTransactionController;
+use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LogoutController;
 use App\Models\Department;
@@ -70,17 +72,6 @@ Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->group(func
     Route::get('/users/{id}', [SuperAdminUserController::class, 'show']);
     Route::put('/users/{id}', [SuperAdminUserController::class, 'update']);
     Route::delete('/users/{id}', [SuperAdminUserController::class, 'destroy']);
-    
-    // Super Admin Projects
-    //Route::get('/projects', [TransactionController::class, 'index'])->name('superadmin.projects');
-    //Route::post('/projects/store', [TransactionController::class, 'store']);
-    //Route::put('/projects/{id}', [TransactionController::class, 'update']);
-    //Route::delete('/projects/{id}', [TransactionController::class, 'destroy']);
-
-    // Super Admin Deliveries
-    //Route::get('/projects/{projectID}/deliveries', [SuperAdminTrackingDeliveryController::class, 'getByProject'])
-        //->name('superadmin.project.deliveries');
-    //Route::post('/projects/{projectID}/deliveries', [SuperAdminTrackingDeliveryController::class, 'store']);
 
     /// Super Admin Transaction
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
@@ -163,6 +154,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 
 Route::middleware(['auth', 'role:client'])->prefix('client')->name('client.')->group(function () {
 
+    // Dashboard
+    Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
+
     // Client Projects
     Route::get('/projects', [ClientProjectController::class, 'index'])->name('projects.index');
     Route::get('/projects/{id}/deliveries', [ClientProjectController::class, 'deliveries'])->name('projects.deliveries');
@@ -176,19 +170,28 @@ Route::middleware(['auth', 'role:client'])->prefix('client')->name('client.')->g
     
 });
 
-Route::middleware(['auth', 'prd.user'])->prefix('user')->group(function () {
-    // Projects
-    Route::get('/projects', [UserProjectController::class, 'index'])->name('user.projects.index');
-    Route::post('/projects/store', [UserProjectController::class, 'store'])->name('user.projects.store');
-    Route::get('/projects/{id}', [UserProjectController::class, 'showByProjectPage'])->name('user.project.show');
-    Route::put('/projects/{id}', [UserProjectController::class, 'update'])->name('user.projects.update');
-    Route::delete('/projects/{id}', [UserProjectController::class, 'destroy'])->name('user.projects.destroy');
+Route::middleware(['auth', 'role:user'])->prefix('user')->name('user.')->group(function () {
     
-    // Tracking Deliveries
-    Route::get('/projects/{projectID}/deliveries', [UserTrackingDeliveryController::class, 'getByProject']);
-    Route::post('/projects/{projectID}/deliveries', [UserTrackingDeliveryController::class, 'store']);
-    Route::put('/trackingdelivery/{id}', [UserTrackingDeliveryController::class, 'update']);
-    Route::delete('/trackingdelivery/{id}', [UserTrackingDeliveryController::class, 'destroy']);
+    // Dashboard (for ALL users with role 'user')
+    Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+    
+    // ... existing routes
+});
+
+Route::middleware(['auth', 'prd.user'])->prefix('user')->name('user.')->group(function () {
+
+     // User Transactions
+    Route::get('/transactions', [UserTransactionController::class, 'index'])->name('transactions.index');
+    Route::post('/transactions/store', [UserTransactionController::class, 'store'])->name('transactions.store');
+    Route::put('/transactions/{id}', [UserTransactionController::class, 'update'])->name('transactions.update');
+    Route::delete('/transactions/{id}', [UserTransactionController::class, 'destroy'])->name('transactions.destroy');
+    
+    // User Transaction Deliveries
+    Route::post('/transactions/{id}/deliveries', [UserTrackingDeliveryController::class, 'store'])->name('trackingdeliveries.store');
+    Route::put('/transactions/{transactionId}/deliveries/{id}', [UserTrackingDeliveryController::class, 'update'])->name('trackingdeliveries.update');
+    Route::delete('/transactions/{transactionId}/deliveries/{id}', [UserTrackingDeliveryController::class, 'destroy'])->name('trackingdeliveries.destroy');
+    Route::put('/deliveries/{delivery}/update-truck', [UserTrackingDeliveryController::class, 'updateTruck'])->name('deliveries.updateTruck');
+
 });
 
 

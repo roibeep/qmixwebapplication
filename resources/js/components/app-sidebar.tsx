@@ -38,7 +38,7 @@ export function AppSidebar() {
                     : userRole === 'admin'
                     ? '/admin/dashboard'
                     : userRole === 'client'
-                    ? '/client/projects' // Client goes straight to projects
+                    ? '/client/dashboard'
                     : userRole === 'user'
                     ? '/user/dashboard'
                     : dashboard(),
@@ -145,7 +145,7 @@ export function AppSidebar() {
             title: 'Records',
             icon: Cuboid,
             children: [
-                { title: 'Transaction', href: '/user/projects' },
+                { title: 'Transaction', href: '/user/transactions' },
             ],
         },
     ];
@@ -158,7 +158,7 @@ export function AppSidebar() {
     } else if (userRole === 'admin') {
         roleBasedTopNav = [...roleBasedTopNav, ...AdminTopNav];
     } else if (userRole === 'client') {
-        roleBasedTopNav = [...roleBasedTopNav, ...clientTopNav]; // Use Records section
+        roleBasedTopNav = [...roleBasedTopNav, ...clientTopNav]; 
     } else if (userRole === 'user' && userDepartment === 'PRD Department') {
         roleBasedTopNav = [...roleBasedTopNav, ...userPRDTopNav];
     }

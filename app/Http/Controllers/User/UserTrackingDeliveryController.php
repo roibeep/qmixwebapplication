@@ -4,51 +4,78 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\TrackingDelivery;
+use App\Models\Transaction;
+use App\Models\Equipment;
 use Illuminate\Http\Request;
 
 class UserTrackingDeliveryController extends Controller
 {
-    public function getByProject($projectID)
+    // Store a new delivery
+    public function store(Request $request, $transactionId)
     {
-        return TrackingDelivery::where('projectID', $projectID)
-            ->orderBy('deliveryID', 'asc')
-            ->get();
-    }
+        $transaction = Transaction::findOrFail($transactionId);
 
-    public function store(Request $request, $projectID)
-    {
-        $data = $request->validate([
+        $validated = $request->validate([
             'mp_no' => 'required|string|max:255',
-            'truck_no' => 'required|string|max:255',
-            'volume' => 'required|numeric',
+            'volume' => 'required|numeric|min:0',
+            'fk_equipment_id' => 'required|exists:equipment,pk_equipment_id',
             'delivery_status' => 'required|string',
+            'schedule_date' => 'nullable|date',
+            'schedule_time' => 'nullable|string',
         ]);
 
-        $data['projectID'] = $projectID;
-        TrackingDelivery::create($data);
-
-        return redirect()->back()->with('success', 'Delivery added successfully.');
-    }
-
-    public function update(Request $request, $id)
-    {
-        $data = $request->validate([
-            'mp_no' => 'required|string|max:255',
-            'truck_no' => 'required|string|max:255',
-            'volume' => 'required|numeric',
-            'delivery_status' => 'required|string',
-            'projectID' => 'nullable|exists:projects,projectID',
+        TrackingDelivery::create([
+            ...$validated,
+            'fk_transac_id' => $transactionId,
+            'overall_volume' => $validated['volume'],
+            'date_created' => now(),
         ]);
 
+        return redirect()->back()->with('success', 'Delivery added successfully!');
+    }
+
+    // Update delivery
+    public function update(Request $request, $transactionId, $id)
+    {
         $delivery = TrackingDelivery::findOrFail($id);
-        $delivery->update($data);
 
-        return redirect()->back()->with('success', 'Delivery updated successfully.');
+        $validated = $request->validate([
+            'mp_no' => 'required|string|max:255',
+            'volume' => 'required|numeric|min:0',
+            'fk_equipment_id' => 'required|exists:equipment,pk_equipment_id',
+            'delivery_status' => 'required|string',
+            'schedule_date' => 'nullable|date',
+            'schedule_time' => 'nullable|string',
+        ]);
+
+        $delivery->update([...$validated, 'date_updated' => now()]);
+
+        return redirect()->back()->with('success', 'Delivery updated successfully!');
     }
 
-    public function destroy($id)
+    // Delete delivery
+    public function destroy($transactionId, $id)
     {
-        TrackingDelivery::findOrFail($id)->delete();
-        return redirect()->back()->with('success', 'Delivery deleted successfully.');
+        $delivery = TrackingDelivery::findOrFail($id);
+        $delivery->delete();
+
+        return redirect()->back()->with('success', 'Delivery deleted successfully!');
+    }
+
+    // Update truck/equipment for a delivery
+    public function updateTruck(Request $request, $delivery)
+    {
+        $deliveryModel = TrackingDelivery::findOrFail($delivery);
+        
+        $validated = $request->validate([
+            'fk_equipment_id' => 'required|exists:equipment,pk_equipment_id',
+        ]);
+
+        $deliveryModel->update([
+            'fk_equipment_id' => $validated['fk_equipment_id'],
+            'date_updated' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Truck updated successfully!');
     }
 }

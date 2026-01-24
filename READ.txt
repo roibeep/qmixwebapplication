@@ -24,6 +24,10 @@ Client:
 email: mindara@gmail.com
 password: Mindara123
 
+User PRD:
+email: user@example.com
+password: User123
+
 SYSTEM LAST UPDATE--
 
 -Logs Page not yet done...
@@ -33,5 +37,7 @@ SYSTEM LAST UPDATE--
 -Hosting the web application not yet done...
 -Improve user experience (filtering, account limitation, etc)
 -Improve user management 
+-Manage Customer not Editable need update
+
 
 Note: The folder name of "Customer" in Client, Admin is Project

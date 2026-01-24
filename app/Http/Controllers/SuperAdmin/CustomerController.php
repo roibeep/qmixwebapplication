@@ -34,7 +34,7 @@ class CustomerController extends Controller
         ]);
 
         User::create([
-            'name'           => $validated['customer_name'], // Use 'name' for User model
+            'name'           => $validated['customer_name'],
             'customer_name'  => $validated['customer_name'],
             'contact_person' => $validated['contact_person'],
             'contact_number' => $validated['contact_number'],
@@ -42,7 +42,7 @@ class CustomerController extends Controller
             'email'          => $validated['email'],
             'password'       => Hash::make($validated['password']),
             'role'           => 'client',
-            'departmentID'   => null, // Clients don't have departments
+            'departmentID'   => null,
         ]);
 
         return redirect()
@@ -60,7 +60,7 @@ class CustomerController extends Controller
             'contact_person' => 'required|string|max:255',
             'contact_number' => 'required|string|max:50',
             'address'        => 'required|string',
-            'email'          => 'required|email|unique:users,email,' . $id,
+            'email'          => 'required|email|unique:users,email,' . $id . ',id', // ← FIXED: Added column name
             'password'       => 'nullable|min:6',
         ]);
 
